@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Lista</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+  }
+  h2 { color: #333; }
+  .container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    max-width: 400px;
+    width: 100%;
+  }
+  input[type="text"],
+  input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin: 6px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  label {
+    display: block;
+    margin-top: 8px;
+  }
+  .checkbox {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    gap: 6px;
+    font-size: 14px;
+  }
+  button {
+    width: 100%;
+    padding: 10px;
+    background: #0078ff;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  button:hover { background: #005fcc; }
+  #copiarBtn {
+    background: #00b45a;
+    display: none;
+  }
+  #copiarBtn:hover { background: #00994d; }
+  pre {
+    background: #222;
+    color: #0f0;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    white-space: pre-wrap;
+    min-height: 50px;
+  }
+</style>
+<script src="android_bridge.js"></script>
+<style id="toolbox-mobile-patch">
+  html { -webkit-text-size-adjust: 100%; }
+  body { overscroll-behavior-y: contain; }
+  @media (max-width: 720px) {
+    body { max-width: 100vw; overflow-x: hidden; }
+    button, input, select, textarea { min-height: 44px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <div class="container">
+    <h2>Gerador de Lista</h2>
+
+    <label for="titulo">Título:</label>
+    <input type="text" id="titulo" placeholder="Ex: Bleach">
+
+    <label for="de">De:</label>
+    <input type="number" id="de" placeholder="Ex: 1">
+
+    <label for="ate">Até:</label>
+    <input type="number" id="ate" placeholder="Ex: 12">
+
+    <div class="checkbox">
+      <input type="checkbox" id="zeroEsquerda">
+      <label for="zeroEsquerda">Adicionar zero à esquerda (01, 02...)</label>
+    </div>
+
+    <button onclick="gerarLista()">Gerar Lista</button>
+    <button id="copiarBtn" onclick="copiarLista()">Copiar Lista</button>
+
+    <pre id="resultado"></pre>
+  </div>
+
+<script>
+function gerarLista() {
+  const titulo = document.getElementById('titulo').value.trim();
+  const de = parseInt(document.getElementById('de').value);
+  const ate = parseInt(document.getElementById('ate').value);
+  const usarZero = document.getElementById('zeroEsquerda').checked;
+
+  const resultado = document.getElementById('resultado');
+  const copiarBtn = document.getElementById('copiarBtn');
+
+  if (!titulo || isNaN(de) || isNaN(ate) || de > ate) {
+    resultado.textContent = "⚠️ Preencha os campos corretamente.";
+    copiarBtn.style.display = "none";
+    return;
+  }
+
+  let lista = "";
+  for (let i = de; i <= ate; i++) {
+    const numero = usarZero ? String(i).padStart(2, '0') : i;
+    lista += `${titulo} | ${numero}: \n`;
+  }
+
+  resultado.textContent = lista.trim();
+  copiarBtn.style.display = "block";
+}
+
+function copiarLista() {
+  const texto = document.getElementById('resultado').textContent;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(texto)
+      .then(mostrarMensagemCopiado)
+      .catch(() => fallbackCopiar(document.getElementById('resultado')));
+  } else {
+    fallbackCopiar(document.getElementById('resultado'));
+  }
+}
+
+function fallbackCopiar(elemento) {
+  const range = document.createRange();
+  range.selectNodeContents(elemento);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+
+  try {
+    document.execCommand('copy');
+    mostrarMensagemCopiado();
+  } catch {
+    alert("Não foi possível copiar automaticamente.\nSelecione e copie manualmente.");
+  }
+  sel.removeAllRanges();
+}
+
+function mostrarMensagemCopiado() {
+  const btn = document.getElementById('copiarBtn');
+  const textoOriginal = btn.textContent;
+  btn.textContent = "✅ Copiado!";
+  btn.disabled = true;
+
+  setTimeout(() => {
+    btn.textContent = textoOriginal;
+    btn.disabled = false;
+  }, 2000);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organizador de Links de Animes</title>
+  <style>
+    :root {
+      --bg: #f5f4fb;
+      --card: #ffffff;
+      --text: #242338;
+      --muted: #6f6d83;
+      --primary: #6750a4;
+      --primary-dark: #4f378b;
+      --primary-soft: #eee8fa;
+      --success: #19764a;
+      --success-soft: #e4f5eb;
+      --warning: #986400;
+      --warning-soft: #fff2cc;
+      --danger: #b3261e;
+      --danger-soft: #fde8e6;
+      --border: #dfdce9;
+      --code: #1d1c29;
+      --shadow: 0 12px 34px rgba(48, 42, 79, .10);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(103, 80, 164, .12), transparent 32rem),
+        linear-gradient(135deg, #f9f7ff, var(--bg));
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    .container {
+      width: min(1220px, calc(100% - 28px));
+      margin: 26px auto 60px;
+    }
+
+    header {
+      color: white;
+      background: linear-gradient(135deg, #4f378b, #8068be);
+      border-radius: 24px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    header h1 { margin: 0 0 8px; font-size: clamp(1.55rem, 5vw, 2.35rem); }
+    header p { margin: 0; opacity: .92; line-height: 1.55; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(320px, .9fr) minmax(390px, 1.35fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .stack { display: grid; gap: 20px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 21px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 { margin: 0 0 16px; font-size: 1.18rem; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1.4fr .6fr;
+      gap: 12px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+
+    label { color: var(--muted); font-size: .87rem; font-weight: 700; }
+
+    input, select, textarea {
+      width: 100%;
+      color: var(--text);
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 12px;
+      outline: none;
+      transition: border-color .16s ease, box-shadow .16s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(103, 80, 164, .13);
+    }
+
+    textarea { resize: vertical; min-height: 210px; line-height: 1.55; }
+
+    #result {
+      min-height: 260px;
+      color: #f6f3ff;
+      background: var(--code);
+      border-color: var(--code);
+      font-family: "Cascadia Code", Consolas, monospace;
+    }
+
+    .options { display: grid; gap: 8px; margin-top: 12px; }
+
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      color: var(--text);
+      line-height: 1.4;
+      font-size: .9rem;
+      cursor: pointer;
+    }
+
+    .check-row input {
+      width: 18px;
+      height: 18px;
+      margin-top: 1px;
+      accent-color: var(--primary);
+      flex: 0 0 auto;
+    }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 15px; }
+
+    button, .file-button {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 750;
+      transition: transform .12s ease, opacity .12s ease, background .12s ease;
+    }
+
+    button:hover, .file-button:hover { transform: translateY(-1px); }
+    button:active, .file-button:active { transform: translateY(0); }
+    button:disabled { opacity: .48; cursor: not-allowed; transform: none; }
+
+    .primary { color: white; background: var(--primary); }
+    .primary:hover { background: var(--primary-dark); }
+    .secondary { color: var(--primary-dark); background: var(--primary-soft); }
+    .success { color: var(--success); background: var(--success-soft); }
+    .warning { color: var(--warning); background: var(--warning-soft); }
+    .danger { color: var(--danger); background: var(--danger-soft); }
+    .neutral { color: #525064; background: #f0eff4; }
+
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-bottom: 14px; }
+
+    .stat {
+      padding: 11px 8px;
+      text-align: center;
+      background: #f8f6fc;
+      border: 1px solid #ebe8f2;
+      border-radius: 13px;
+    }
+
+    .stat strong { display: block; color: var(--primary-dark); font-size: 1.18rem; }
+    .stat span { color: var(--muted); font-size: .74rem; }
+
+    .range-box {
+      padding: 11px 13px;
+      background: var(--primary-soft);
+      border-radius: 13px;
+      color: var(--primary-dark);
+      font-weight: 700;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .validation-list { display: grid; gap: 8px; max-height: 310px; overflow: auto; }
+
+    .validation-item {
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: .87rem;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .validation-item.ok { color: var(--success); background: var(--success-soft); }
+    .validation-item.warn { color: var(--warning); background: var(--warning-soft); }
+    .validation-item.error { color: var(--danger); background: var(--danger-soft); }
+    .validation-item.duplicate { color: var(--primary-dark); background: var(--primary-soft); }
+
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      padding: 22px 12px;
+    }
+
+    .hint { margin: 10px 0 0; color: var(--muted); font-size: .82rem; line-height: 1.5; }
+
+    .status {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      z-index: 50;
+      transform: translate(-50%, 18px);
+      opacity: 0;
+      pointer-events: none;
+      max-width: min(92vw, 560px);
+      color: white;
+      background: #353143;
+      padding: 11px 16px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      transition: .2s ease;
+      text-align: center;
+    }
+
+    .status.show { opacity: 1; transform: translate(-50%, 0); }
+
+    .history-toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-bottom: 13px;
+    }
+
+    .history-list { display: grid; gap: 10px; max-height: 580px; overflow: auto; }
+
+    .history-item {
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 13px;
+      background: #fff;
+    }
+
+    .history-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+
+    .history-name { font-weight: 800; overflow-wrap: anywhere; }
+    .history-date { color: var(--muted); font-size: .76rem; white-space: nowrap; }
+    .history-meta { color: var(--muted); font-size: .84rem; line-height: 1.45; }
+    .history-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+    .history-actions button { padding: 7px 9px; font-size: .79rem; }
+
+    .model-preview {
+      padding: 10px 12px;
+      margin-top: 8px;
+      color: var(--muted);
+      background: #f8f6fc;
+      border-radius: 12px;
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: .8rem;
+      overflow-wrap: anywhere;
+    }
+
+    #historyImport { display: none; }
+
+    @media (max-width: 920px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      .container { width: min(100% - 18px, 1220px); margin-top: 10px; }
+      header, .card { border-radius: 17px; }
+      .form-grid, .history-toolbar { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      textarea { min-height: 180px; }
+      #result { min-height: 230px; }
+      .history-top { display: block; }
+      .history-date { display: block; margin-top: 4px; }
+    }
+  </style>
+<script src="android_bridge.js"></script>
+<style id="toolbox-mobile-patch">
+  html { -webkit-text-size-adjust: 100%; }
+  body { overscroll-behavior-y: contain; }
+  @media (max-width: 720px) {
+    body { max-width: 100vw; overflow-x: hidden; }
+    button, input, select, textarea { min-height: 44px; }
+  }
+</style>
+
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔗 Organizador de Links de Animes</h1>
+      <p>Cole os links em ordem, escolha o modelo e deixe a numeração dos episódios ser montada automaticamente.</p>
+    </header>
+
+    <main class="layout">
+      <section class="stack">
+        <div class="card">
+          <h2>Dados do lote</h2>
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="animeName">Nome do anime</label>
+              <input id="animeName" type="text" placeholder="Ex.: Naruto" autocomplete="off">
+            </div>
+
+            <div class="field">
+              <label for="startEpisode">Episódio inicial</label>
+              <input id="startEpisode" type="number" min="0" step="1" value="1">
+            </div>
+
+            <div class="field full">
+              <label for="outputModel">Modelo de organização</label>
+              <select id="outputModel">
+                <option value="model1">Modelo 1 — Nome | nº: link</option>
+                <option value="model2">Modelo 2 — link | Nome | nº</option>
+              </select>
+              <div class="model-preview" id="modelPreview"></div>
+            </div>
+
+            <div class="field full">
+              <label for="links">Links, um por linha e na ordem dos episódios</label>
+              <textarea id="links" spellcheck="false" placeholder="https://site.com/episodio-1&#10;https://site.com/episodio-2&#10;https://site.com/episodio-3"></textarea>
+            </div>
+          </div>
+
+          <div class="options">
+            <label class="check-row">
+              <input id="autoCorrect" type="checkbox" checked>
+              <span>Aplicar correções seguras: remover espaços externos, retirar marcadores simples e adicionar <strong>https://</strong> quando o domínio estiver evidente.</span>
+            </label>
+
+            <label class="check-row">
+              <input id="removeDuplicates" type="checkbox">
+              <span>Remover links repetidos do resultado. Desmarcado, os repetidos permanecem e recebem numeração normalmente.</span>
+            </label>
+
+            <label class="check-row">
+              <input id="autoPreview" type="checkbox" checked>
+              <span>Atualizar a prévia automaticamente enquanto os dados são alterados.</span>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button class="primary" id="organizeBtn" type="button">Organizar links</button>
+            <button class="warning" id="removeDuplicatesBtn" type="button">Remover duplicatas agora</button>
+            <button class="neutral" id="clearLinksBtn" type="button">Limpar somente links</button>
+            <button class="danger" id="clearAllBtn" type="button">Limpar tudo</button>
+          </div>
+
+          <p class="hint">
+            A validação é local: ela verifica formato, protocolos, espaços, linhas suspeitas e duplicatas. Nenhum site é acessado.
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>Validação e contagem</h2>
+
+          <div class="stats">
+            <div class="stat"><strong id="lineCount">0</strong><span>linhas úteis</span></div>
+            <div class="stat"><strong id="validCount">0</strong><span>links válidos</span></div>
+            <div class="stat"><strong id="warningCount">0</strong><span>avisos</span></div>
+            <div class="stat"><strong id="duplicateCount">0</strong><span>duplicatas</span></div>
+          </div>
+
+          <div class="range-box" id="episodeRange">Nenhum episódio calculado.</div>
+          <div class="validation-list" id="validationList">
+            <div class="empty">Cole alguns links para iniciar a verificação.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="stack">
+        <div class="card" id="resultCard">
+          <h2>Resultado editável</h2>
+
+          <div class="field">
+            <label for="result">Você pode alterar manualmente o texto antes de copiar ou exportar</label>
+            <textarea id="result" spellcheck="false" placeholder="O resultado organizado aparecerá aqui."></textarea>
+          </div>
+
+          <div class="actions">
+            <button class="primary" id="copyBtn" type="button">Copiar resultado</button>
+            <button class="secondary" id="shareBtn" type="button">Compartilhar texto</button>
+            <button class="success" id="downloadBtn" type="button">Baixar TXT</button>
+            <button class="secondary" id="saveHistoryBtn" type="button">Salvar no histórico</button>
+            <button class="warning" id="continueBtn" type="button">Continuar numeração</button>
+          </div>
+
+          <p class="hint">
+            “Continuar numeração” muda o episódio inicial para o próximo número e limpa apenas os links, mantendo o anime e o modelo.
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>Histórico de lotes</h2>
+
+          <div class="history-toolbar">
+            <div class="field">
+              <label for="historySearch">Buscar no histórico</label>
+              <input id="historySearch" type="search" placeholder="Nome do anime ou episódio">
+            </div>
+            <button class="danger" id="clearHistoryBtn" type="button">Limpar histórico</button>
+          </div>
+
+          <div class="actions" style="margin-top:0; margin-bottom:13px">
+            <button class="secondary" id="exportHistoryBtn" type="button">Exportar histórico</button>
+            <label class="file-button secondary" for="historyImport">Importar histórico</label>
+            <input id="historyImport" type="file" accept=".json,application/json">
+          </div>
+
+          <div class="history-list" id="historyList">
+            <div class="empty">Nenhum lote salvo.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="status" id="status" role="status" aria-live="polite"></div>
+
+  <script>
+    "use strict";
+
+    const HISTORY_KEY = "organizadorLinksAnimes_history_v1";
+    const DRAFT_KEY = "organizadorLinksAnimes_draft_v1";
+    const MAX_HISTORY = 100;
+    const $ = (id) => document.getElementById(id);
+
+    const state = {
+      processed: [], issues: [], duplicateTotal: 0, generatedCount: 0,
+      firstEpisode: null, lastEpisode: null, lastGeneratedText: ""
+    };
+
+    let history = loadHistory();
+    let previewTimer = null;
+
+    function showStatus(message) {
+      const element = $("status");
+      element.textContent = message;
+      element.classList.add("show");
+      clearTimeout(showStatus.timer);
+      showStatus.timer = setTimeout(() => element.classList.remove("show"), 2800);
+    }
+
+    function escapeHTML(value = "") {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+      }[char]));
+    }
+
+    function safeInteger(value, fallback = 1) {
+      const number = Number(value);
+      return Number.isInteger(number) && number >= 0 ? number : fallback;
+    }
+
+    function getRawLines() { return $("links").value.split(/\r?\n/); }
+
+    function removeSimpleMarker(text) {
+      return text
+        .replace(/^\s*[-*•]\s+/, "")
+        .replace(/^\s*\d+\s*[.)-]\s+/, "")
+        .trim();
+    }
+
+    function looksLikeBareDomain(value) {
+      return /^(?:www\.)?[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z]{2,})(?::\d+)?(?:[/?#].*)?$/i.test(value);
+    }
+
+    function canonicalDuplicateKey(urlText) {
+      try {
+        const url = new URL(urlText);
+        const protocol = url.protocol.toLowerCase();
+        const hostname = url.hostname.toLowerCase();
+        const port = url.port ? `:${url.port}` : "";
+        return `${protocol}//${hostname}${port}${url.pathname}${url.search}${url.hash}`;
+      } catch {
+        return urlText.trim();
+      }
+    }
+
+    function inspectLines() {
+      const rawLines = getRawLines();
+      const autoCorrect = $("autoCorrect").checked;
+      const seen = new Map();
+      const processed = [];
+      const issues = [];
+      let duplicateTotal = 0;
+
+      rawLines.forEach((raw, index) => {
+        const lineNumber = index + 1;
+        const original = raw;
+        let value = raw.trim();
+        if (!value) return;
+
+        const corrections = [];
+
+        if (autoCorrect) {
+          const withoutMarker = removeSimpleMarker(value);
+          if (withoutMarker !== value) {
+            value = withoutMarker;
+            corrections.push("marcador inicial removido");
+          }
+
+          if (
+            (value.startsWith("<") && value.endsWith(">")) ||
+            (value.startsWith('"') && value.endsWith('"')) ||
+            (value.startsWith("'") && value.endsWith("'"))
+          ) {
+            value = value.slice(1, -1).trim();
+            corrections.push("caracteres externos removidos");
+          }
+
+          if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(value) && looksLikeBareDomain(value)) {
+            value = `https://${value}`;
+            corrections.push("https:// adicionado");
+          }
+        }
+
+        let valid = false;
+        let warning = "";
+
+        try {
+          const parsed = new URL(value);
+          if (!["http:", "https:"].includes(parsed.protocol)) {
+            warning = `protocolo não aceito (${parsed.protocol})`;
+          } else if (!parsed.hostname || !parsed.hostname.includes(".")) {
+            warning = "domínio incompleto ou suspeito";
+          } else if (/\s/.test(value)) {
+            warning = "o endereço contém espaços";
+          } else {
+            valid = true;
+          }
+        } catch {
+          warning = !/^https?:\/\//i.test(value)
+            ? "não começa com http:// ou https://"
+            : "formato de URL não reconhecido";
+        }
+
+        const duplicateKey = canonicalDuplicateKey(value);
+        let duplicateOf = null;
+
+        if (seen.has(duplicateKey)) {
+          duplicateOf = seen.get(duplicateKey);
+          duplicateTotal += 1;
+        } else {
+          seen.set(duplicateKey, lineNumber);
+        }
+
+        processed.push({
+          original, value, lineNumber, valid, warning, corrections, duplicateOf, duplicateKey
+        });
+
+        if (corrections.length) {
+          issues.push({
+            type: "ok",
+            message: `Linha ${lineNumber}: ${corrections.join(", ")}.`
+          });
+        }
+
+        if (warning) {
+          issues.push({
+            type: "error",
+            message: `Linha ${lineNumber}: ${warning} — ${value}`
+          });
+        }
+
+        if (duplicateOf !== null) {
+          issues.push({
+            type: "duplicate",
+            message: `Linha ${lineNumber}: link repetido da linha ${duplicateOf}.`
+          });
+        }
+      });
+
+      return { processed, issues, duplicateTotal };
+    }
+
+    function getUniqueRecords(records) {
+      const used = new Set();
+      return records.filter((record) => {
+        if (used.has(record.duplicateKey)) return false;
+        used.add(record.duplicateKey);
+        return true;
+      });
+    }
+
+    function getOutputRecords(processed) {
+      return $("removeDuplicates").checked ? getUniqueRecords(processed) : processed;
+    }
+
+    function formatLine(link, animeName, episode, model) {
+      return model === "model2"
+        ? `${link} | ${animeName} | ${episode}`
+        : `${animeName} | ${episode}: ${link}`;
+    }
+
+    function updateModelPreview() {
+      const animeName = $("animeName").value.trim() || "Naruto";
+      const episode = safeInteger($("startEpisode").value, 1);
+      const sampleLink = "https://site.com/episodio";
+      $("modelPreview").textContent = $("outputModel").value === "model2"
+        ? `${sampleLink} | ${animeName} | ${episode}`
+        : `${animeName} | ${episode}: ${sampleLink}`;
+    }
+
+    function generate({ preserveManualResult = false } = {}) {
+      const animeName = $("animeName").value.trim();
+      const startEpisode = safeInteger($("startEpisode").value, 1);
+      const model = $("outputModel").value;
+      const inspection = inspectLines();
+      const outputRecords = getOutputRecords(inspection.processed);
+
+      state.processed = inspection.processed;
+      state.issues = inspection.issues;
+      state.duplicateTotal = inspection.duplicateTotal;
+      state.generatedCount = outputRecords.length;
+      state.firstEpisode = outputRecords.length ? startEpisode : null;
+      state.lastEpisode = outputRecords.length ? startEpisode + outputRecords.length - 1 : null;
+
+      const output = animeName
+        ? outputRecords.map((record, index) =>
+            formatLine(record.value, animeName, startEpisode + index, model)
+          ).join("\n")
+        : "";
+
+      state.lastGeneratedText = output;
+
+      if (!preserveManualResult || !$("result").value.trim()) {
+        $("result").value = output;
+      }
+
+      renderValidation();
+      saveDraft();
+      return output;
+    }
+
+    function renderValidation() {
+      const processed = state.processed;
+      const validCount = processed.filter((item) => item.valid).length;
+      const warningCount = processed.filter((item) => !item.valid).length;
+
+      $("lineCount").textContent = processed.length;
+      $("validCount").textContent = validCount;
+      $("warningCount").textContent = warningCount;
+      $("duplicateCount").textContent = state.duplicateTotal;
+
+      if (state.generatedCount) {
+        const removed = processed.length - state.generatedCount;
+        const removedText = removed > 0 ? ` • ${removed} duplicata(s) removida(s)` : "";
+        $("episodeRange").textContent =
+          `${state.generatedCount} episódio(s): ${state.firstEpisode} até ${state.lastEpisode}${removedText}`;
+      } else {
+        $("episodeRange").textContent = "Nenhum episódio calculado.";
+      }
+
+      if (!processed.length) {
+        $("validationList").innerHTML =
+          '<div class="empty">Cole alguns links para iniciar a verificação.</div>';
+        return;
+      }
+
+      const messages = [...state.issues];
+      if (!messages.length) {
+        messages.push({
+          type: "ok",
+          message: `Tudo certo: ${processed.length} link(s) reconhecido(s), sem avisos ou duplicatas.`
+        });
+      } else if (validCount) {
+        messages.unshift({
+          type: "ok",
+          message: `${validCount} link(s) com formato válido. Revise apenas os avisos abaixo.`
+        });
+      }
+
+      $("validationList").innerHTML = messages.map((item) => `
+        <div class="validation-item ${item.type}">${escapeHTML(item.message)}</div>
+      `).join("");
+    }
+
+    function schedulePreview() {
+      updateModelPreview();
+      saveDraft();
+      if (!$("autoPreview").checked) return;
+      clearTimeout(previewTimer);
+      previewTimer = setTimeout(() => generate(), 180);
+    }
+
+    function getCurrentOutput() { return $("result").value.trim(); }
+
+    async function copyText(text) {
+      if (!text) {
+        showStatus("Não há texto para copiar.");
+        return false;
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const helper = document.createElement("textarea");
+        helper.value = text;
+        helper.style.position = "fixed";
+        helper.style.opacity = "0";
+        document.body.appendChild(helper);
+        helper.select();
+        document.execCommand("copy");
+        helper.remove();
+      }
+
+      showStatus("Resultado copiado.");
+      return true;
+    }
+
+    function sanitizeFilename(value) {
+      return value
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "")
+        .replace(/\s+/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_+|_+$/g, "")
+        .slice(0, 80) || "anime";
+    }
+
+    function downloadText(filename, text, mime = "text/plain;charset=utf-8") {
+      const blob = new Blob(["\uFEFF", text], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function buildTxtFilename() {
+      const animeName = sanitizeFilename($("animeName").value.trim());
+      const start = state.firstEpisode ?? safeInteger($("startEpisode").value, 1);
+      const end = state.lastEpisode ?? start;
+      return `${animeName}_Episodios_${start}-${end}.txt`;
+    }
+
+    function saveDraft() {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        animeName: $("animeName").value,
+        startEpisode: $("startEpisode").value,
+        outputModel: $("outputModel").value,
+        links: $("links").value,
+        autoCorrect: $("autoCorrect").checked,
+        removeDuplicates: $("removeDuplicates").checked,
+        autoPreview: $("autoPreview").checked
+      }));
+    }
+
+    function loadDraft() {
+      try {
+        const draft = JSON.parse(localStorage.getItem(DRAFT_KEY));
+        if (!draft || typeof draft !== "object") return;
+        $("animeName").value = draft.animeName || "";
+        $("startEpisode").value = safeInteger(draft.startEpisode, 1);
+        $("outputModel").value = draft.outputModel === "model2" ? "model2" : "model1";
+        $("links").value = draft.links || "";
+        $("autoCorrect").checked = draft.autoCorrect !== false;
+        $("removeDuplicates").checked = Boolean(draft.removeDuplicates);
+        $("autoPreview").checked = draft.autoPreview !== false;
+      } catch {}
+    }
+
+    function loadHistory() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(HISTORY_KEY));
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function persistHistory() {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+      renderHistory();
+    }
+
+    function saveCurrentToHistory() {
+      const output = getCurrentOutput();
+      const animeName = $("animeName").value.trim();
+
+      if (!animeName) {
+        showStatus("Informe o nome do anime.");
+        return;
+      }
+
+      if (!output) {
+        showStatus("Organize pelo menos um link antes de salvar.");
+        return;
+      }
+
+      if (!state.generatedCount) generate({ preserveManualResult: true });
+
+      history.unshift({
+        id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+        createdAt: new Date().toISOString(),
+        animeName,
+        startEpisode: safeInteger($("startEpisode").value, 1),
+        endEpisode: state.lastEpisode ?? safeInteger($("startEpisode").value, 1),
+        outputModel: $("outputModel").value,
+        links: $("links").value,
+        output,
+        autoCorrect: $("autoCorrect").checked,
+        removeDuplicates: $("removeDuplicates").checked
+      });
+
+      history = history.slice(0, MAX_HISTORY);
+      persistHistory();
+      showStatus("Lote salvo no histórico.");
+    }
+
+    function renderHistory() {
+      const query = $("historySearch").value.trim().toLowerCase();
+      const filtered = history.filter((item) => {
+        const haystack = `${item.animeName} ${item.startEpisode} ${item.endEpisode} ${item.output || ""}`.toLowerCase();
+        return !query || haystack.includes(query);
+      });
+
+      if (!filtered.length) {
+        $("historyList").innerHTML = '<div class="empty">Nenhum lote encontrado.</div>';
+        return;
+      }
+
+      $("historyList").innerHTML = filtered.map((item) => {
+        const date = new Date(item.createdAt).toLocaleString("pt-BR");
+        const modelName = item.outputModel === "model2" ? "Modelo 2" : "Modelo 1";
+        const count = String(item.output || "").split(/\r?\n/).filter(Boolean).length;
+
+        return `
+          <article class="history-item">
+            <div class="history-top">
+              <div class="history-name">${escapeHTML(item.animeName)}</div>
+              <time class="history-date">${escapeHTML(date)}</time>
+            </div>
+            <div class="history-meta">
+              Episódios ${item.startEpisode}–${item.endEpisode} • ${count} linha(s) • ${modelName}
+            </div>
+            <div class="history-actions">
+              <button class="secondary" type="button" onclick="loadHistoryItem('${item.id}')">Reabrir</button>
+              <button class="neutral" type="button" onclick="copyHistoryItem('${item.id}')">Copiar</button>
+              <button class="success" type="button" onclick="downloadHistoryItem('${item.id}')">TXT</button>
+              <button class="danger" type="button" onclick="deleteHistoryItem('${item.id}')">Excluir</button>
+            </div>
+          </article>`;
+      }).join("");
+    }
+
+    window.loadHistoryItem = function(id) {
+      const item = history.find((record) => record.id === id);
+      if (!item) return;
+      $("animeName").value = item.animeName || "";
+      $("startEpisode").value = safeInteger(item.startEpisode, 1);
+      $("outputModel").value = item.outputModel === "model2" ? "model2" : "model1";
+      $("links").value = item.links || "";
+      $("autoCorrect").checked = item.autoCorrect !== false;
+      $("removeDuplicates").checked = Boolean(item.removeDuplicates);
+      generate();
+      $("result").value = item.output || state.lastGeneratedText;
+      updateModelPreview();
+      saveDraft();
+      $("resultCard").scrollIntoView({ behavior: "smooth", block: "start" });
+      showStatus("Lote reaberto.");
+    };
+
+    window.copyHistoryItem = function(id) {
+      const item = history.find((record) => record.id === id);
+      if (item) copyText(item.output || "");
+    };
+
+    window.downloadHistoryItem = function(id) {
+      const item = history.find((record) => record.id === id);
+      if (!item) return;
+      const filename = `${sanitizeFilename(item.animeName)}_Episodios_${item.startEpisode}-${item.endEpisode}.txt`;
+      downloadText(filename, item.output || "");
+      showStatus("Arquivo TXT criado.");
+    };
+
+    window.deleteHistoryItem = function(id) {
+      const item = history.find((record) => record.id === id);
+      if (!item || !confirm(`Excluir o lote de "${item.animeName}"?`)) return;
+      history = history.filter((record) => record.id !== id);
+      persistHistory();
+      showStatus("Lote excluído do histórico.");
+    };
+
+    $("organizeBtn").addEventListener("click", () => {
+      const output = generate();
+      if (!$("animeName").value.trim() && state.processed.length) {
+        showStatus("Informe o nome do anime.");
+        return;
+      }
+      if (output) {
+        $("resultCard").scrollIntoView({ behavior: "smooth", block: "start" });
+        showStatus("Links organizados.");
+      }
+    });
+
+    $("removeDuplicatesBtn").addEventListener("click", () => {
+      const inspection = inspectLines();
+      if (!inspection.duplicateTotal) {
+        showStatus("Nenhum link repetido foi encontrado.");
+        generate();
+        return;
+      }
+      const unique = getUniqueRecords(inspection.processed);
+      $("links").value = unique.map((record) => record.value).join("\n");
+      generate();
+      showStatus(`${inspection.duplicateTotal} duplicata(s) removida(s).`);
+    });
+
+    $("clearLinksBtn").addEventListener("click", () => {
+      $("links").value = "";
+      $("result").value = "";
+      generate();
+      $("links").focus();
+      showStatus("Links removidos; os demais dados foram mantidos.");
+    });
+
+    $("clearAllBtn").addEventListener("click", () => {
+      if (!confirm("Limpar nome, numeração, links e resultado?")) return;
+      $("animeName").value = "";
+      $("startEpisode").value = 1;
+      $("outputModel").value = "model1";
+      $("links").value = "";
+      $("result").value = "";
+      $("autoCorrect").checked = true;
+      $("removeDuplicates").checked = false;
+      generate();
+      updateModelPreview();
+      saveDraft();
+      showStatus("Campos limpos.");
+    });
+
+    $("copyBtn").addEventListener("click", () => copyText(getCurrentOutput()));
+
+    $("shareBtn").addEventListener("click", async () => {
+      const text = getCurrentOutput();
+      if (!text) {
+        showStatus("Não há texto para compartilhar.");
+        return;
+      }
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `Links — ${$("animeName").value.trim() || "Anime"}`,
+            text
+          });
+          showStatus("Compartilhamento aberto.");
+          return;
+        } catch (error) {
+          if (error && error.name === "AbortError") return;
+        }
+      }
+
+      await copyText(text);
+      showStatus("Compartilhamento indisponível; o texto foi copiado.");
+    });
+
+    $("downloadBtn").addEventListener("click", () => {
+      const text = getCurrentOutput();
+      if (!text) {
+        showStatus("Não há texto para baixar.");
+        return;
+      }
+      if (!state.generatedCount) generate({ preserveManualResult: true });
+      downloadText(buildTxtFilename(), text);
+      showStatus("Arquivo TXT criado.");
+    });
+
+    $("saveHistoryBtn").addEventListener("click", saveCurrentToHistory);
+
+    $("continueBtn").addEventListener("click", () => {
+      if (!state.generatedCount) generate({ preserveManualResult: true });
+      if (!state.generatedCount || state.lastEpisode === null) {
+        showStatus("Organize algum link antes de continuar a numeração.");
+        return;
+      }
+      $("startEpisode").value = state.lastEpisode + 1;
+      $("links").value = "";
+      $("result").value = "";
+      generate();
+      $("links").focus();
+      showStatus(`O próximo lote começará no episódio ${$("startEpisode").value}.`);
+    });
+
+    $("historySearch").addEventListener("input", renderHistory);
+
+    $("clearHistoryBtn").addEventListener("click", () => {
+      if (!history.length) {
+        showStatus("O histórico já está vazio.");
+        return;
+      }
+      if (!confirm("Excluir todo o histórico salvo neste navegador?")) return;
+      history = [];
+      persistHistory();
+      showStatus("Histórico apagado.");
+    });
+
+    $("exportHistoryBtn").addEventListener("click", () => {
+      if (!history.length) {
+        showStatus("Não há histórico para exportar.");
+        return;
+      }
+      const payload = {
+        app: "Organizador de Links de Animes",
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        history
+      };
+      downloadText(
+        `historico_links_animes_${new Date().toISOString().slice(0, 10)}.json`,
+        JSON.stringify(payload, null, 2),
+        "application/json;charset=utf-8"
+      );
+      showStatus("Histórico exportado.");
+    });
+
+    $("historyImport").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      try {
+        const parsed = JSON.parse(await file.text());
+        const imported = Array.isArray(parsed) ? parsed : parsed.history;
+        if (!Array.isArray(imported)) throw new Error("Formato inválido");
+
+        const normalized = imported
+          .filter((item) => item && typeof item === "object" && item.animeName && item.output)
+          .map((item) => ({
+            ...item,
+            id: item.id || (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`),
+            createdAt: item.createdAt || new Date().toISOString()
+          }));
+
+        if (!normalized.length) throw new Error("Nenhum registro válido");
+
+        const replace = confirm(
+          `Foram encontrados ${normalized.length} lote(s).\n\n` +
+          "OK: substituir o histórico atual.\nCancelar: juntar ao histórico atual."
+        );
+
+        history = replace ? normalized : [...normalized, ...history];
+        history = history.slice(0, MAX_HISTORY);
+        persistHistory();
+        showStatus("Histórico importado.");
+      } catch {
+        showStatus("Não foi possível importar esse arquivo.");
+      } finally {
+        event.target.value = "";
+      }
+    });
+
+    [
+      "animeName", "startEpisode", "outputModel", "links",
+      "autoCorrect", "removeDuplicates", "autoPreview"
+    ].forEach((id) => {
+      const element = $(id);
+      element.addEventListener(
+        element.matches("select, input[type='checkbox']") ? "change" : "input",
+        schedulePreview
+      );
+    });
+
+    $("result").addEventListener("input", saveDraft);
+
+    loadDraft();
+    updateModelPreview();
+    generate();
+    renderHistory();
+  </script>
+</body>
+</html>

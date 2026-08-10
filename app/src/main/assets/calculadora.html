@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Prazo de Animes</title>
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --bg-color: #1e1e2e;
+            --card-bg: #2d2d44;
+            --text-color: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify_content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background-color: #181825;
+            color: white;
+            font-size: 1rem;
+            box-sizing: border-box; /* Garante que o padding não aumente a largura */
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #5a4ad1;
+        }
+
+        .result-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: #181825;
+            border-radius: 8px;
+            display: none; /* Escondido por padrão */
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .result-box h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .result-box p {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+    </style>
+<script src="android_bridge.js"></script>
+<style id="toolbox-mobile-patch">
+  html { -webkit-text-size-adjust: 100%; }
+  body { overscroll-behavior-y: contain; }
+  @media (max-width: 720px) {
+    body { max-width: 100vw; overflow-x: hidden; }
+    button, input, select, textarea { min-height: 44px; }
+  }
+</style>
+
+</head>
+<body>
+
+    <div class="container">
+        <h1>📅 Prazo de Animes</h1>
+        
+        <div class="input-group">
+            <label for="startDate">Data Inicial (Lançamento)</label>
+            <input type="date" id="startDate">
+        </div>
+
+        <div class="input-group">
+            <label for="weeks">Quantas semanas adicionar?</label>
+            <input type="number" id="weeks" placeholder="Ex: 12" min="0">
+        </div>
+
+        <button onclick="calcularData()">Calcular Data Futura</button>
+
+        <div id="resultado" class="result-box">
+            <h3>A nova data será:</h3>
+            <p id="dataFinal">--/--/----</p>
+        </div>
+    </div>
+
+    <script>
+        // Define a data de hoje como padrão no input
+        document.getElementById('startDate').valueAsDate = new Date();
+
+        function calcularData() {
+            const inputDate = document.getElementById('startDate').value;
+            const weeks = parseInt(document.getElementById('weeks').value);
+
+            // Validação simples
+            if (!inputDate || isNaN(weeks)) {
+                alert("Por favor, preencha a data e a quantidade de semanas.");
+                return;
+            }
+
+            // Criação da data. 
+            // Nota: Usamos split para garantir que o fuso horário local não altere o dia.
+            const [year, month, day] = inputDate.split('-').map(Number);
+            const dataInicial = new Date(year, month - 1, day);
+
+            // Adiciona as semanas (semanas * 7 dias)
+            dataInicial.setDate(dataInicial.getDate() + (weeks * 7));
+
+            // Formatação para o padrão brasileiro (dd/mm/aaaa)
+            const dataFormatada = dataInicial.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            // Exibir resultado
+            const resultBox = document.getElementById('resultado');
+            const dataFinalText = document.getElementById('dataFinal');
+            
+            dataFinalText.textContent = dataFormatada;
+            resultBox.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

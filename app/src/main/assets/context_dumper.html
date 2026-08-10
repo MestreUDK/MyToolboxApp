@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Context Dumper Pro (v4.2)</title>
+<script src="vendor/jszip.min.js"></script>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --text: #1e293b;
+    --border: #e2e8f0;
+    --code-bg: #1e1e1e;
+    --success: #10b981;
+    --warning: #f59e0b;
+  }
+
+  [data-theme="dark"] {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #f1f5f9;
+    --border: #334155;
+    --code-bg: #000000;
+  }
+
+  body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text); padding: 20px; transition: 0.3s; }
+  
+  .container { background: var(--surface); padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: 100%; max-width: 900px; margin: 0 auto; border: 1px solid var(--border); }
+  
+  header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
+  h2 { margin: 0; color: var(--primary); font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
+  
+  /* Upload Area */
+  .upload-area { border: 2px dashed var(--border); padding: 30px; text-align: center; border-radius: 12px; transition: 0.2s; cursor: pointer; position: relative; background: rgba(37, 99, 235, 0.02); margin-bottom: 20px;}
+  .upload-area:hover { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); }
+  input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
+  /* Tree Selector Styles */
+  .tree-container { margin: 15px 0; border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 400px; overflow-y: auto; background: var(--bg); display: none; }
+  .tree-ul { list-style: none; padding-left: 20px; margin: 0; }
+  .tree-ul li { margin: 2px 0; }
+  
+  .tree-label { cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; user-select: none; padding: 2px 5px; border-radius: 4px; }
+  .tree-label:hover { background: rgba(0,0,0,0.05); }
+  [data-theme="dark"] .tree-label:hover { background: rgba(255,255,255,0.1); }
+  
+  .folder-icon { color: #f59e0b; font-weight: bold; min-width: 16px; text-align: center; }
+  .file-icon { color: #64748b; min-width: 16px; text-align: center; }
+  
+  /* Config Groups */
+  .config-section { margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border); }
+  .group-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin: 10px 0; font-weight: 700; }
+  .ext-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 8px; }
+  .ext-label { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; background: var(--bg); padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border); }
+  
+  /* Controls & Stats */
+  .controls { margin-top: 25px; display: flex; gap: 10px; flex-wrap: wrap; }
+  button { padding: 10px 18px; font-size: 14px; cursor: pointer; border: none; border-radius: 8px; font-weight: 600; color: #fff; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; background: #ccc !important; }
+  
+  .btn-primary { background: var(--primary); }
+  .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+  .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-ignored { background: var(--warning); color: #000; }
+  
+  .stats-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; background: var(--bg); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border); font-size: 13px; }
+  .stat-item b { display: block; font-size: 16px; color: var(--text); }
+
+  .progress-container { margin-top: 15px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; display: none; }
+  .progress-bar { height: 100%; background: var(--success); width: 0%; transition: width 0.2s; }
+
+  pre { margin-top: 20px; background: var(--code-bg); color: #e5e5e5; padding: 15px; border-radius: 8px; max-height: 350px; overflow-y: auto; font-family: 'Consolas', monospace; font-size: 12px; border: 1px solid #333; }
+  .theme-toggle { cursor: pointer; font-size: 18px; background: none; border: none; color: var(--text); }
+  .hidden { display: none !important; }
+</style>
+<script src="android_bridge.js"></script>
+<style id="toolbox-mobile-patch">
+  html { -webkit-text-size-adjust: 100%; }
+  body { overscroll-behavior-y: contain; }
+  @media (max-width: 720px) {
+    body { max-width: 100vw; overflow-x: hidden; }
+    button, input, select, textarea { min-height: 44px; }
+  }
+</style>
+
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h2>📦 Context Dumper <small style="font-size: 0.6em; opacity: 0.7; margin-left: 10px">v4.2</small></h2>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Mudar Tema">🌓</button>
+  </header>
+  
+  <div class="upload-area" id="dropZone">
+    <span id="fileNameDisplay">📂 Clique ou Arraste o ZIP aqui</span>
+    <input type="file" id="zipInput" accept=".zip" onclick="this.value=null" onchange="analyzeZip()">
+  </div>
+
+  <div id="selectionStage" class="hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+        <h4 style="margin:0">📂 Selecione o que incluir:</h4>
+        <button class="btn-secondary" style="padding: 4px 10px; font-size:12px;" onclick="toggleAllTree(true)">Marcar Tudo</button>
+    </div>
+    <div class="tree-container" id="treeContainer" style="display: none;"></div>
+  </div>
+
+  <div class="config-section" id="extConfigArea"></div>
+  
+  <div class="stats-panel">
+    <div class="stat-item"><b><span id="statFiles">0</span></b> Arquivos</div>
+    <div class="stat-item"><b><span id="statTokens">0</span></b> Tokens</div>
+    <div class="stat-item"><b><span id="statSize">0 MB</span></b> Tamanho</div>
+  </div>
+
+  <div class="progress-container" id="progressContainer"><div class="progress-bar" id="progressBar"></div></div>
+
+  <div class="controls">
+    <button class="btn-primary" id="btnProcess" onclick="generateContext()" disabled>⚡ Gerar Contexto</button>
+    <button class="btn-secondary hidden" id="btnCopy" onclick="universalCopy(globalContext)">📋 Copiar Tudo</button>
+    <button class="btn-secondary hidden" id="btnCopyTree" onclick="universalCopyTree()">🌳 Copiar Árvore</button>
+    <button class="btn-ignored hidden" id="btnIgnored" onclick="downloadIgnored()">⚠️ Ver Ignorados</button>
+    <button class="btn-secondary" onclick="window.location.reload()">🔄 Reiniciar</button>
+  </div>
+
+  <pre id="output">Aguardando arquivo...</pre>
+</div>
+
+<script>
+// --- Configuração ---
+const EXT_GROUPS = {
+  "Frontend": ['html', 'css', 'js', 'jsx', 'ts', 'tsx', 'vue', 'svelte', 'json'],
+  "Backend": ['php', 'py', 'java', 'c', 'cpp', 'cs', 'go', 'rs', 'rb', 'lua', 'sql'],
+  "Config": ['xml', 'yaml', 'yml', 'env', 'toml', 'ini', 'md', 'txt']
+};
+const ALWAYS_IGNORE = ['node_modules', '.git', '.idea', '.vscode', 'dist', 'build', '__pycache__', 'package-lock.json', 'yarn.lock'];
+
+let currentZip = null;
+let currentZipName = "projeto"; // Variável para guardar o nome do ZIP
+let globalContext = ""; 
+let globalTree = "";
+let globalIgnored = ""; 
+
+window.onload = () => {
+  renderExtensions();
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) toggleTheme(true);
+};
+
+function renderExtensions() {
+  const container = document.getElementById('extConfigArea');
+  container.innerHTML = '';
+  for (const [group, exts] of Object.entries(EXT_GROUPS)) {
+    const title = document.createElement('div');
+    title.className = 'group-title';
+    title.innerText = group;
+    container.appendChild(title);
+    const grid = document.createElement('div');
+    grid.className = 'ext-grid';
+    exts.sort().forEach(ext => {
+      const div = document.createElement('label');
+      div.className = 'ext-label';
+      div.innerHTML = `<input type="checkbox" class="ext-check" value="${ext}" checked> .${ext}`;
+      grid.appendChild(div);
+    });
+    container.appendChild(grid);
+  }
+}
+
+function toggleTheme(forceDark = false) {
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  document.body.setAttribute('data-theme', (forceDark || !isDark) ? 'dark' : 'light');
+}
+
+// --- PASSO 1: Analisar ZIP ---
+async function analyzeZip() {
+  const input = document.getElementById('zipInput');
+  const output = document.getElementById('output');
+  
+  if (!input.files.length) return;
+
+  const file = input.files[0];
+  
+  // Salva o nome limpo do arquivo para usar no download depois
+  currentZipName = file.name.replace(/\.zip$/i, "").replace(/\s+/g, "_");
+
+  document.getElementById('fileNameDisplay').innerHTML = `✅ <b>${file.name}</b> carregado`;
+  output.textContent = "⌛ Lendo estrutura do ZIP...";
+
+  try {
+    currentZip = await JSZip.loadAsync(file);
+    const paths = Object.keys(currentZip.files).sort();
+    
+    const cleanPaths = paths.filter(p => !ALWAYS_IGNORE.some(ign => p.includes(ign) && (p.endsWith('/') || p.includes('/'+ign+'/'))));
+    
+    if (cleanPaths.length === 0) {
+        output.textContent = "❌ O ZIP parece vazio ou só tem arquivos ignorados.";
+        return;
+    }
+
+    renderInteractiveTree(cleanPaths);
+    
+    document.getElementById('selectionStage').classList.remove('hidden');
+    document.getElementById('treeContainer').style.display = 'block';
+    document.getElementById('btnProcess').disabled = false;
+    
+    output.textContent = `✅ Estrutura carregada! Selecione as pastas acima e clique em 'Gerar Contexto'.\n(Detectados ${cleanPaths.length} itens)`;
+
+  } catch (err) {
+    console.error(err);
+    output.textContent = "❌ Erro ao ler ZIP: " + err.message;
+  }
+}
+
+// --- Renderizador da Árvore ---
+function renderInteractiveTree(paths) {
+  const container = document.getElementById('treeContainer');
+  const root = {};
+
+  paths.forEach(path => {
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    const parts = cleanPath.split('/');
+    if (cleanPath.endsWith('/')) parts.pop();
+    
+    let current = root;
+    parts.forEach((part, i) => {
+      if (!current[part]) current[part] = {};
+      if (i === parts.length - 1 && !path.endsWith('/')) {
+          current[part] = null; 
+      }
+      current = current[part] || {};
+    });
+  });
+
+  function buildHtml(node, fullPath) {
+    let html = '<ul class="tree-ul">';
+    const keys = Object.keys(node).sort((a, b) => {
+        const aIsFile = node[a] === null;
+        const bIsFile = node[b] === null;
+        if (!aIsFile && bIsFile) return -1;
+        if (aIsFile && !bIsFile) return 1;
+        return a.localeCompare(b);
+    });
+
+    for (const key of keys) {
+      const isFile = node[key] === null;
+      const currentPath = fullPath ? `${fullPath}/${key}` : key;
+      const value = isFile ? currentPath : currentPath + "/";
+      
+      html += `<li>
+        <label class="tree-label">
+          <input type="checkbox" class="tree-sel" value="${value}" checked onchange="toggleChildren(this)">
+          <span class="${isFile ? 'file-icon' : 'folder-icon'}">${isFile ? '📄' : '📁'}</span>
+          ${key}
+        </label>`;
+      
+      if (!isFile) {
+        html += buildHtml(node[key], currentPath);
+      }
+      html += '</li>';
+    }
+    html += '</ul>';
+    return html;
+  }
+  
+  container.innerHTML = buildHtml(root, "");
+}
+
+function toggleChildren(checkbox) {
+  const parentLi = checkbox.closest('li');
+  const children = parentLi.querySelectorAll('ul input[type="checkbox"]');
+  children.forEach(c => c.checked = checkbox.checked);
+}
+
+function toggleAllTree(state) {
+  document.querySelectorAll('.tree-sel').forEach(c => c.checked = state);
+}
+
+// --- PASSO 2: Gerar Contexto Final ---
+async function generateContext() {
+  if (!currentZip) return;
+
+  const btnProcess = document.getElementById('btnProcess');
+  btnProcess.disabled = true;
+  document.getElementById('progressContainer').style.display = 'block';
+  
+  const selectedValues = Array.from(document.querySelectorAll('.tree-sel:checked')).map(cb => cb.value);
+  const allowedExts = Array.from(document.querySelectorAll('.ext-check:checked')).map(cb => cb.value);
+
+  let finalText = `# CONTEXTO DO PROJETO: ${currentZipName}\n# Gerado em: ${new Date().toLocaleString()}\n\n`;
+  let ignoredLog = "";
+  let filesCount = 0;
+  let charCount = 0;
+  let ignoredCount = 0;
+
+  const allZipPaths = Object.keys(currentZip.files);
+  const filesToProcess = [];
+  const selectedSet = new Set(selectedValues);
+
+  for (const path of allZipPaths) {
+      if (currentZip.files[path].dir) continue; 
+      if (selectedSet.has(path)) {
+          filesToProcess.push(path);
+      }
+  }
+  filesToProcess.sort();
+
+  const treeText = generateAsciiTree(filesToProcess);
+  finalText += "## ESTRUTURA SELECIONADA\n```text\n" + treeText + "\n```\n\n## CONTEÚDO DOS ARQUIVOS\n\n";
+
+  const total = filesToProcess.length;
+  
+  for (let i = 0; i < total; i++) {
+    const path = filesToProcess[i];
+    const ext = path.split('.').pop().toLowerCase();
+    
+    if (!allowedExts.includes(ext)) {
+      ignoredLog += `[EXTENSÃO] ${path}\n`;
+      ignoredCount++;
+      continue;
+    }
+
+    const fileEntry = currentZip.files[path];
+    if (fileEntry._data.uncompressedSize > 120 * 1024) {
+      finalText += `### ⚠️ ARQUIVO OMITIDO (MUITO GRANDE): ${path}\n\n`;
+      ignoredLog += `[TAMANHO] ${path}\n`;
+      ignoredCount++;
+      continue;
+    }
+
+    const content = await fileEntry.async('string');
+    finalText += `### 📄 ${path}\n\`\`\`${ext}\n${content}\n\`\`\`\n\n`;
+    
+    charCount += content.length;
+    filesCount++;
+    
+    if (i % 5 === 0) document.getElementById('progressBar').style.width = `${(i/total)*100}%`;
+  }
+
+  globalContext = finalText;
+  globalTree = treeText;
+  globalIgnored = ignoredLog;
+
+  document.getElementById('progressBar').style.width = '100%';
+  document.getElementById('output').textContent = finalText.substring(0, 3000) + "\n... (Preview truncado)";
+  
+  updateStats(filesCount, charCount, finalText.length);
+  
+  document.getElementById('btnCopy').classList.remove('hidden');
+  document.getElementById('btnCopyTree').classList.remove('hidden');
+  if (ignoredCount > 0) {
+      document.getElementById('btnIgnored').classList.remove('hidden');
+      document.getElementById('btnIgnored').innerText = `⚠️ Ignorados (${ignoredCount})`;
+  }
+  
+  btnProcess.disabled = false;
+  
+  // AQUI É FEITO O DOWNLOAD COM O NOME CORRETO
+  downloadFile(currentZipName, finalText, false);
+}
+
+function generateAsciiTree(paths) {
+  const root = {};
+  paths.forEach(path => {
+    const parts = path.split('/');
+    let current = root;
+    parts.forEach((part, i) => {
+      if (!current[part]) current[part] = (i === parts.length - 1) ? null : {};
+      current = current[part];
+    });
+  });
+  
+  let output = "";
+  function build(node, prefix = "") {
+    const keys = Object.keys(node).sort();
+    keys.forEach((key, idx) => {
+      const isLast = idx === keys.length - 1;
+      output += prefix + (isLast ? "└── " : "├── ") + key + "\n";
+      if (node[key] !== null) build(node[key], prefix + (isLast ? "    " : "│   "));
+    });
+  }
+  build(root);
+  return output;
+}
+
+function updateStats(files, chars, size) {
+  document.getElementById('statFiles').innerText = files;
+  document.getElementById('statTokens').innerText = Math.ceil(chars / 4).toLocaleString();
+  document.getElementById('statSize').innerText = (size / 1024 / 1024).toFixed(2) + " MB";
+}
+
+function universalCopy(text) {
+  if (!text) return alert("Nada para copiar!");
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text)
+      .then(() => alert("✅ Copiado!"))
+      .catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.left = "-9999px";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+    alert("✅ Copiado (Modo Compatibilidade)!");
+  } catch (err) {
+    alert("❌ Erro ao copiar.");
+  }
+  document.body.removeChild(textArea);
+}
+
+function universalCopyTree() {
+    const text = "Estrutura do Projeto:\n```text\n" + globalTree + "\n```";
+    universalCopy(text);
+}
+
+// --- FUNÇÃO DE DOWNLOAD ATUALIZADA (Data/Hora Legível) ---
+function downloadFile(baseName, content, isIgnored) {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  
+  // Gera Data/Hora segura para nome de arquivo (sem barras ou dois pontos)
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR').replace(/\//g, '-'); // Ex: 31-12-2025
+  const timeStr = now.toLocaleTimeString('pt-BR').replace(/:/g, '-'); // Ex: 14-30-00
+  
+  const suffix = isIgnored ? "IGNORADOS" : "CONTEXTO";
+  
+  // Formato Final: NomeDoZip_Data_Hora.txt
+  link.download = `${baseName}_${dateStr}_${timeStr}.txt`;
+  
+  if (isIgnored) {
+      link.download = `IGNORADOS_${baseName}_${dateStr}_${timeStr}.txt`;
+  }
+  
+  link.click();
+}
+
+function downloadIgnored() {
+    downloadFile(currentZipName, globalIgnored, true);
+}
+</script>
+</body>
+</html>

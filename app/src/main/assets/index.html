@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Anime Toolbox</title>
+<style>
+:root{--bg:#f5f3fb;--card:#fff;--text:#252338;--muted:#747088;--p:#6750a4;--p2:#4f378b;--line:#e3deee;--shadow:0 12px 32px rgba(50,42,82,.11)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(circle at 10% 0%,#e8e0ff 0,transparent 32rem),var(--bg);color:var(--text);min-height:100vh}
+.wrap{width:min(1000px,calc(100% - 26px));margin:0 auto;padding:24px 0 46px}.hero{background:linear-gradient(135deg,var(--p2),#846cc2);color:#fff;border-radius:24px;padding:24px;box-shadow:var(--shadow)}
+.hero h1{margin:0 0 7px;font-size:clamp(1.7rem,6vw,2.5rem)}.hero p{margin:0;opacity:.9;line-height:1.5}.section-title{font-size:1rem;margin:22px 3px 12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.tool{display:flex;gap:13px;align-items:center;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 7px 22px rgba(50,42,82,.06);transition:.15s}
+.tool:active{transform:scale(.985)}.ico{width:50px;height:50px;border-radius:15px;display:grid;place-items:center;font-size:1.55rem;background:#eee9f9;flex:0 0 auto}.tool h2{font-size:1rem;margin:0 0 4px}.tool p{margin:0;color:var(--muted);font-size:.82rem;line-height:1.35}.foot{text-align:center;color:var(--muted);font-size:.78rem;margin-top:25px}
+@media(max-width:620px){.wrap{width:min(100% - 18px,1000px);padding-top:10px}.hero{border-radius:19px;padding:20px}.grid{grid-template-columns:1fr}.tool{min-height:82px}}
+</style>
+</head>
+<body><div class="wrap">
+<section class="hero"><h1>🧰 Anime Toolbox</h1><p>Suas ferramentas reunidas em um único aplicativo Android.</p></section>
+<div class="section-title">FERRAMENTAS</div>
+<div class="grid">
+<a class="tool" href="agenda.html"><div class="ico">📺</div><div><h2>Agenda Semanal</h2><p>Organize lançamentos, episódios e versões dubladas.</p></div></a>
+<a class="tool" href="calculadora.html"><div class="ico">📅</div><div><h2>Calculadora de Prazo</h2><p>Calcule datas futuras a partir de semanas.</p></div></a>
+<a class="tool" href="context_dumper.html"><div class="ico">📦</div><div><h2>Context Dumper</h2><p>Leia ZIPs e gere contexto de projetos.</p></div></a>
+<a class="tool" href="lista.html"><div class="ico">🧾</div><div><h2>Gerador de Lista</h2><p>Gere listas numeradas rapidamente.</p></div></a>
+<a class="tool" href="organizador.html"><div class="ico">🔗</div><div><h2>Organizador de Links</h2><p>Numere, valide, copie e exporte links.</p></div></a>
+<a class="tool" href="poster.html"><div class="ico">📝</div><div><h2>Gerador de Posts</h2><p>Monte e copie posts formatados do AniKing.</p></div></a>
+</div>
+<div class="foot">Anime Toolbox • v1.0.0</div>
+</div></body></html>
