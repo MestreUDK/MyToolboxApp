@@ -18,8 +18,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.view.Gravity;
-import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 import android.webkit.ValueCallback;
@@ -78,27 +78,28 @@ public class MainActivity extends Activity {
         LinearLayout toolbar = new LinearLayout(this);
         toolbar.setOrientation(LinearLayout.HORIZONTAL);
         toolbar.setGravity(Gravity.CENTER_VERTICAL);
-        toolbar.setPadding(dp(4), 0, dp(8), 0);
+        toolbar.setPadding(dp(2), 0, dp(6), 0);
         toolbar.setBackgroundColor(Color.rgb(79, 55, 139));
-        root.addView(toolbar, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(54)));
+        root.addView(toolbar, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(50)));
 
         Button back = toolbarButton("‹");
         back.setContentDescription("Voltar");
         back.setOnClickListener(v -> goBack());
-        toolbar.addView(back, new LinearLayout.LayoutParams(dp(52), LinearLayout.LayoutParams.MATCH_PARENT));
+        toolbar.addView(back, new LinearLayout.LayoutParams(dp(44), LinearLayout.LayoutParams.MATCH_PARENT));
 
         Button home = toolbarButton("⌂");
         home.setContentDescription("Início");
         home.setOnClickListener(v -> webView.loadUrl(HOME_URL));
-        toolbar.addView(home, new LinearLayout.LayoutParams(dp(52), LinearLayout.LayoutParams.MATCH_PARENT));
+        toolbar.addView(home, new LinearLayout.LayoutParams(dp(44), LinearLayout.LayoutParams.MATCH_PARENT));
 
         titleView = new TextView(this);
         titleView.setText("Anime Toolbox");
         titleView.setTextColor(Color.WHITE);
-        titleView.setTextSize(17);
+        titleView.setTextSize(15.5f);
         titleView.setGravity(Gravity.CENTER_VERTICAL);
         titleView.setSingleLine(true);
-        titleView.setPadding(dp(8), 0, 0, 0);
+        titleView.setEllipsize(TextUtils.TruncateAt.END);
+        titleView.setPadding(dp(6), 0, 0, 0);
         toolbar.addView(titleView, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1));
 
         webView = new WebView(this);
@@ -110,11 +111,15 @@ public class MainActivity extends Activity {
         Button button = new Button(this);
         button.setText(text);
         button.setTextColor(Color.WHITE);
-        button.setTextSize(26);
+        button.setTextSize(20);
         button.setGravity(Gravity.CENTER);
         button.setBackgroundColor(Color.TRANSPARENT);
         button.setAllCaps(false);
         button.setPadding(0, 0, 0, 0);
+        button.setMinWidth(0);
+        button.setMinimumWidth(0);
+        button.setMinHeight(0);
+        button.setMinimumHeight(0);
         return button;
     }
 
@@ -211,9 +216,18 @@ public class MainActivity extends Activity {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            String title = view.getTitle();
+            String title = simplifyTitle(view.getTitle());
             titleView.setText(title == null || title.trim().isEmpty() ? "Anime Toolbox" : title);
         }
+    }
+
+    private String simplifyTitle(String title) {
+        if (title == null) return "Anime Toolbox";
+        String t = title.replaceAll("\\s*\\(v[^)]*\\)", "").trim();
+        if (t.equalsIgnoreCase("Gerador de Posts AniKing")) return "Gerador de Posts";
+        if (t.equalsIgnoreCase("Calculadora de Prazo de Animes")) return "Calculadora de Prazo";
+        if (t.equalsIgnoreCase("Organizador de Links de Animes")) return "Organizador de Links";
+        return t.isEmpty() ? "Anime Toolbox" : t;
     }
 
     private String guessMimeType(String assetPath) {
