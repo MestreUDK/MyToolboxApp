@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Markdown / BBCode Toolbox</title>
+<script src="android_bridge.js"></script>
+<style>
+:root{
+  --bg:#171821;--panel:#222430;--panel2:#2a2d3b;--input:#151720;--text:#edf0f7;--muted:#9ba3b4;
+  --accent:#8b7cf6;--accent2:#6f60df;--border:#3a3e4f;--green:#65c18c;--red:#e86f7b;--code:#101118;
+}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;padding:14px;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overscroll-behavior-y:contain}
+.app{width:min(1180px,100%);margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.title{background:linear-gradient(135deg,#4f378b,#7f67be);padding:18px;border-radius:16px}.title h1{margin:0 0 5px;font-size:1.35rem}.title p{margin:0;color:#eee9ff;font-size:.86rem;line-height:1.45}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:13px}.card h2{font-size:1rem;margin:0 0 10px;color:#c9c1ff}.label{display:block;font-size:.75rem;text-transform:uppercase;font-weight:800;color:var(--muted);margin:0 0 6px}
+select,input,textarea,button{font:inherit}select,input,textarea{width:100%;border:1px solid var(--border);background:var(--input);color:var(--text);border-radius:9px;padding:10px;outline:none}textarea{min-height:310px;resize:vertical;line-height:1.5;font-family:"Cascadia Code",Consolas,monospace;font-size:13px}select:focus,input:focus,textarea:focus{border-color:var(--accent)}
+.toolbar{display:flex;flex-wrap:wrap;gap:7px}.toolbtn,.action{border:0;border-radius:9px;cursor:pointer;font-weight:750;min-height:40px;padding:8px 11px}.toolbtn{background:var(--panel2);color:var(--text);border:1px solid var(--border)}.toolbtn:active,.action:active{transform:scale(.98)}.action{background:var(--accent);color:white}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border)}.success{background:var(--green);color:#102218}.danger{background:var(--red);color:white}.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.preview{min-height:240px;background:#11131a;border:1px solid var(--border);border-radius:12px;padding:14px;overflow:auto;line-height:1.55;overflow-wrap:anywhere}.preview h1,.preview h2,.preview h3{margin:.65em 0 .35em}.preview code{background:#252836;padding:2px 5px;border-radius:5px}.preview pre{background:var(--code);padding:11px;border-radius:8px;overflow:auto}.preview blockquote{margin:10px 0;padding:6px 12px;border-left:4px solid var(--accent);color:#c9ced9;background:#1b1d27}.preview table{border-collapse:collapse;width:100%;margin:10px 0}.preview th,.preview td{border:1px solid #4a4e60;padding:7px;text-align:left}.preview a{color:#9db7ff}.preview details{background:#1c1f2b;padding:8px;border-radius:8px}.hint{font-size:.78rem;color:var(--muted);line-height:1.45;margin-top:8px}.counter{font-size:.78rem;color:var(--muted);text-align:right;margin-top:5px}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--green);color:#102218;font-weight:800;padding:10px 15px;border-radius:10px;opacity:0;pointer-events:none;transition:.2s;z-index:20}.toast.show{opacity:1}
+@media(max-width:840px){.app{grid-template-columns:1fr}.title{padding:15px}textarea{min-height:260px}}@media(max-width:520px){body{padding:9px}.row,.actions{grid-template-columns:1fr}.toolbtn,.action{min-height:44px}.card{padding:11px}.toolbar{gap:6px}.toolbtn{padding:8px 9px;font-size:.84rem}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="col">
+    <section class="title"><h1>📝 Markdown / BBCode Toolbox</h1><p>Edite, formate, converta e copie textos para GitHub, Steam, fóruns e outras plataformas.</p></section>
+    <section class="card">
+      <div class="row">
+        <div><span class="label">Modo de edição</span><select id="mode"><option value="markdown">Markdown</option><option value="bbcode">BBCode</option></select></div>
+        <div><span class="label">Ação rápida</span><select id="preset" onchange="applyPreset(this.value);this.value=''">
+          <option value="">Inserir modelo...</option><option value="release">Notas de versão</option><option value="guide">Seção de guia</option><option value="warning">Aviso destacado</option>
+        </select></div>
+      </div>
+    </section>
+    <section class="card">
+      <h2>⚡ Formatação rápida</h2>
+      <div class="toolbar">
+        <button class="toolbtn" onclick="formatSel('bold')"><b>B</b> Negrito</button>
+        <button class="toolbtn" onclick="formatSel('italic')"><i>I</i> Itálico</button>
+        <button class="toolbtn" onclick="formatSel('strike')">S̶ Riscado</button>
+        <button class="toolbtn" onclick="formatSel('h1')">H1</button>
+        <button class="toolbtn" onclick="formatSel('h2')">H2</button>
+        <button class="toolbtn" onclick="formatSel('h3')">H3</button>
+        <button class="toolbtn" onclick="formatSel('link')">🔗 Link</button>
+        <button class="toolbtn" onclick="formatSel('quote')">❝ Citação</button>
+        <button class="toolbtn" onclick="formatSel('code')">⌨ Código</button>
+        <button class="toolbtn" onclick="formatSel('spoiler')">🙈 Spoiler</button>
+        <button class="toolbtn" onclick="formatSel('ul')">• Lista</button>
+        <button class="toolbtn" onclick="formatSel('ol')">1. Lista</button>
+        <button class="toolbtn" onclick="formatSel('table')">▦ Tabela</button>
+        <button class="toolbtn" onclick="formatSel('hr')">— Linha</button>
+      </div>
+    </section>
+    <section class="card">
+      <span class="label">Editor</span>
+      <textarea id="editor" spellcheck="false" placeholder="Digite ou cole seu texto aqui..."></textarea>
+      <div class="counter" id="counter">0 caracteres • 0 linhas</div>
+    </section>
+  </div>
+
+  <div class="col">
+    <section class="card">
+      <h2>👁️ Prévia</h2>
+      <div id="preview" class="preview"></div>
+      <div class="hint">A prévia cobre as formatações comuns da ferramenta. Algumas plataformas podem interpretar extensões de Markdown/BBCode de forma diferente.</div>
+    </section>
+    <section class="card">
+      <h2>🔄 Conversão</h2>
+      <div class="actions">
+        <button class="action" onclick="convertTo('markdown')">Converter para Markdown</button>
+        <button class="action" onclick="convertTo('bbcode')">Converter para BBCode</button>
+        <button class="action secondary" onclick="convertTo('plain')">Converter para texto simples</button>
+        <button class="action secondary" onclick="copyEditor()">📋 Copiar conteúdo</button>
+      </div>
+    </section>
+    <section class="card">
+      <h2>🧹 Editor</h2>
+      <div class="actions">
+        <button class="action success" onclick="saveManual()">💾 Salvar localmente</button>
+        <button class="action danger" onclick="clearEditor()">🗑️ Limpar</button>
+      </div>
+      <div class="hint">O conteúdo também é salvo automaticamente neste aplicativo por meio do armazenamento local do WebView.</div>
+    </section>
+  </div>
+</div>
+<div id="toast" class="toast">Copiado!</div>
+<script>
+const STORAGE_KEY='markdown_bbcode_toolbox_v1';
+const editor=document.getElementById('editor'), mode=document.getElementById('mode'), preview=document.getElementById('preview'), counter=document.getElementById('counter');
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function escReg(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify({text:editor.value,mode:mode.value}));}
+function load(){try{const d=JSON.parse(localStorage.getItem(STORAGE_KEY));if(d){editor.value=d.text||'';mode.value=d.mode||'markdown';}}catch(e){}}
+function update(){save();const t=editor.value;counter.textContent=`${t.length} caracteres • ${t? t.split(/\n/).length:0} linhas`;preview.innerHTML=mode.value==='markdown'?renderMarkdown(t):renderBBCode(t);}
+
+function renderMarkdown(text){
+  let s=escapeHtml(text);
+  s=s.replace(/```(?:\w+)?\n([\s\S]*?)```/g,'<pre><code>$1</code></pre>');
+  s=s.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/~~(.+?)~~/g,'<s>$1</s>').replace(/(?<!\*)\*([^\n*]+?)\*(?!\*)/g,'<em>$1</em>');
+  s=s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2">$1</a>');
+  s=s.replace(/`([^`\n]+)`/g,'<code>$1</code>');
+  s=s.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+  s=s.replace(/\|\|(.+?)\|\|/g,'<details><summary>Spoiler</summary>$1</details>');
+  s=renderMarkdownTables(s);
+  s=renderMarkdownLists(s);
+  s=s.replace(/^---$/gm,'<hr>').replace(/\n/g,'<br>');
+  s=s.replace(/<br>(<\/?(?:h[1-3]|pre|blockquote|ul|ol|li|table|thead|tbody|tr|th|td|details|summary|hr)[^>]*>)/g,'$1').replace(/(<\/?(?:h[1-3]|pre|blockquote|ul|ol|li|table|thead|tbody|tr|th|td|details|summary|hr)[^>]*>)<br>/g,'$1');
+  return s||'<span style="color:#7f8797">A prévia aparecerá aqui.</span>';
+}
+function renderMarkdownLists(s){
+  const lines=s.split('\n');let out=[],i=0;
+  while(i<lines.length){
+    if(/^[-*] /.test(lines[i])){let a=[];while(i<lines.length&&/^[-*] /.test(lines[i]))a.push(lines[i++].replace(/^[-*] /,''));out.push('<ul>'+a.map(x=>'<li>'+x+'</li>').join('')+'</ul>');continue;}
+    if(/^\d+\. /.test(lines[i])){let a=[];while(i<lines.length&&/^\d+\. /.test(lines[i]))a.push(lines[i++].replace(/^\d+\. /,''));out.push('<ol>'+a.map(x=>'<li>'+x+'</li>').join('')+'</ol>');continue;}
+    out.push(lines[i++]);
+  }return out.join('\n');
+}
+function renderMarkdownTables(s){
+  const lines=s.split('\n');let out=[],i=0;
+  while(i<lines.length){
+    if(i+1<lines.length && /^\s*\|.*\|\s*$/.test(lines[i]) && /^\s*\|?\s*:?-+/.test(lines[i+1])){
+      const head=lines[i].trim().replace(/^\||\|$/g,'').split('|').map(x=>x.trim());i+=2;let rows=[];
+      while(i<lines.length&&/^\s*\|.*\|\s*$/.test(lines[i])){rows.push(lines[i].trim().replace(/^\||\|$/g,'').split('|').map(x=>x.trim()));i++;}
+      out.push('<table><thead><tr>'+head.map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(x=>'<td>'+x+'</td>').join('')+'</tr>').join('')+'</tbody></table>');continue;
+    }out.push(lines[i++]);
+  }return out.join('\n');
+}
+function renderBBCode(text){
+  let s=escapeHtml(text);
+  const reps=[
+    [/\[b\]([\s\S]*?)\[\/b\]/gi,'<strong>$1</strong>'],[/\[i\]([\s\S]*?)\[\/i\]/gi,'<em>$1</em>'],[/\[s\]([\s\S]*?)\[\/s\]/gi,'<s>$1</s>'],
+    [/\[h1\]([\s\S]*?)\[\/h1\]/gi,'<h1>$1</h1>'],[/\[h2\]([\s\S]*?)\[\/h2\]/gi,'<h2>$1</h2>'],[/\[h3\]([\s\S]*?)\[\/h3\]/gi,'<h3>$1</h3>'],
+    [/\[url=(https?:\/\/[^\]]+)\]([\s\S]*?)\[\/url\]/gi,'<a href="$1">$2</a>'],[/\[quote\]([\s\S]*?)\[\/quote\]/gi,'<blockquote>$1</blockquote>'],
+    [/\[code\]([\s\S]*?)\[\/code\]/gi,'<pre><code>$1</code></pre>'],[/\[spoiler\]([\s\S]*?)\[\/spoiler\]/gi,'<details><summary>Spoiler</summary>$1</details>'],[/\[hr\]/gi,'<hr>']
+  ];reps.forEach(([r,v])=>s=s.replace(r,v));
+  s=s.replace(/\[list\]([\s\S]*?)\[\/list\]/gi,(m,c)=>'<ul>'+c.split(/\[\*\]/).filter(x=>x.trim()).map(x=>'<li>'+x.trim()+'</li>').join('')+'</ul>');
+  s=s.replace(/\[list=1\]([\s\S]*?)\[\/list\]/gi,(m,c)=>'<ol>'+c.split(/\[\*\]/).filter(x=>x.trim()).map(x=>'<li>'+x.trim()+'</li>').join('')+'</ol>');
+  s=s.replace(/\[table\]([\s\S]*?)\[\/table\]/gi,(m,c)=>'<table>'+c.replace(/\[tr\]/gi,'<tr>').replace(/\[\/tr\]/gi,'</tr>').replace(/\[th\]/gi,'<th>').replace(/\[\/th\]/gi,'</th>').replace(/\[td\]/gi,'<td>').replace(/\[\/td\]/gi,'</td>')+'</table>');
+  s=s.replace(/\n/g,'<br>').replace(/<br>(<\/?(?:h[1-3]|pre|blockquote|ul|ol|li|table|tr|th|td|details|summary|hr)[^>]*>)/g,'$1').replace(/(<\/?(?:h[1-3]|pre|blockquote|ul|ol|li|table|tr|th|td|details|summary|hr)[^>]*>)<br>/g,'$1');
+  return s||'<span style="color:#7f8797">A prévia aparecerá aqui.</span>';
+}
+function wrap(before,after,placeholder='texto'){const s=editor.selectionStart,e=editor.selectionEnd,sel=editor.value.slice(s,e)||placeholder;editor.setRangeText(before+sel+after,s,e,'end');editor.focus();update();}
+function insert(txt){const s=editor.selectionStart,e=editor.selectionEnd;editor.setRangeText(txt,s,e,'end');editor.focus();update();}
+function formatSel(type){const m=mode.value==='markdown';
+  if(type==='bold')return wrap(m?'**':'[b]',m?'**':'[/b]');if(type==='italic')return wrap(m?'*':'[i]',m?'*':'[/i]');if(type==='strike')return wrap(m?'~~':'[s]',m?'~~':'[/s]');
+  if(['h1','h2','h3'].includes(type)){const n=type.slice(1);return m?insert('#'.repeat(+n)+' Título'):wrap('['+type+']','[/'+type+']','Título');}
+  if(type==='link')return m?wrap('[','](https://exemplo.com)','Texto do link'):wrap('[url=https://exemplo.com]','[/url]','Texto do link');
+  if(type==='quote')return m?insert('> Citação'):wrap('[quote]','[/quote]','Citação');if(type==='code')return m?wrap('```\n','\n```','código'):wrap('[code]','[/code]','código');
+  if(type==='spoiler')return m?wrap('||','||','spoiler'):wrap('[spoiler]','[/spoiler]','spoiler');
+  if(type==='ul')return insert(m?'- Item 1\n- Item 2':'[list]\n[*]Item 1\n[*]Item 2\n[/list]');if(type==='ol')return insert(m?'1. Item 1\n2. Item 2':'[list=1]\n[*]Item 1\n[*]Item 2\n[/list]');
+  if(type==='table')return insert(m?'| Coluna 1 | Coluna 2 |\n| --- | --- |\n| Dado 1 | Dado 2 |':'[table]\n[tr][th]Coluna 1[/th][th]Coluna 2[/th][/tr]\n[tr][td]Dado 1[/td][td]Dado 2[/td][/tr]\n[/table]');
+  if(type==='hr')return insert(m?'\n---\n':'\n[hr]\n');
+}
+function mdToBB(s){
+  s=s.replace(/```(?:\w+)?\n([\s\S]*?)```/g,'[code]$1[/code]').replace(/^### (.+)$/gm,'[h3]$1[/h3]').replace(/^## (.+)$/gm,'[h2]$1[/h2]').replace(/^# (.+)$/gm,'[h1]$1[/h1]');
+  s=s.replace(/\*\*(.+?)\*\*/g,'[b]$1[/b]').replace(/~~(.+?)~~/g,'[s]$1[/s]').replace(/(?<!\*)\*([^\n*]+?)\*(?!\*)/g,'[i]$1[/i]').replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'[url=$2]$1[/url]').replace(/`([^`\n]+)`/g,'[code]$1[/code]').replace(/^> (.+)$/gm,'[quote]$1[/quote]').replace(/\|\|(.+?)\|\|/g,'[spoiler]$1[/spoiler]').replace(/^---$/gm,'[hr]');
+  const lines=s.split('\n');let out=[],i=0;while(i<lines.length){if(/^[-*] /.test(lines[i])){let a=[];while(i<lines.length&&/^[-*] /.test(lines[i]))a.push('[*]'+lines[i++].replace(/^[-*] /,''));out.push('[list]\n'+a.join('\n')+'\n[/list]');continue;}if(/^\d+\. /.test(lines[i])){let a=[];while(i<lines.length&&/^\d+\. /.test(lines[i]))a.push('[*]'+lines[i++].replace(/^\d+\. /,''));out.push('[list=1]\n'+a.join('\n')+'\n[/list]');continue;}out.push(lines[i++]);}return out.join('\n');
+}
+function bbToMd(s){
+  s=s.replace(/\[b\]([\s\S]*?)\[\/b\]/gi,'**$1**').replace(/\[i\]([\s\S]*?)\[\/i\]/gi,'*$1*').replace(/\[s\]([\s\S]*?)\[\/s\]/gi,'~~$1~~');
+  s=s.replace(/\[h1\]([\s\S]*?)\[\/h1\]/gi,'# $1').replace(/\[h2\]([\s\S]*?)\[\/h2\]/gi,'## $1').replace(/\[h3\]([\s\S]*?)\[\/h3\]/gi,'### $1');
+  s=s.replace(/\[url=(https?:\/\/[^\]]+)\]([\s\S]*?)\[\/url\]/gi,'[$2]($1)').replace(/\[quote\]([\s\S]*?)\[\/quote\]/gi,(m,c)=>c.split('\n').map(x=>'> '+x).join('\n')).replace(/\[code\]([\s\S]*?)\[\/code\]/gi,'```\n$1\n```').replace(/\[spoiler\]([\s\S]*?)\[\/spoiler\]/gi,'||$1||').replace(/\[hr\]/gi,'---');
+  s=s.replace(/\[list\]([\s\S]*?)\[\/list\]/gi,(m,c)=>c.split(/\[\*\]/).filter(x=>x.trim()).map(x=>'- '+x.trim()).join('\n')).replace(/\[list=1\]([\s\S]*?)\[\/list\]/gi,(m,c)=>c.split(/\[\*\]/).filter(x=>x.trim()).map((x,i)=>(i+1)+'. '+x.trim()).join('\n'));
+  s=s.replace(/\[table\]([\s\S]*?)\[\/table\]/gi,(m,c)=>{const rows=[...c.matchAll(/\[tr\]([\s\S]*?)\[\/tr\]/gi)].map(x=>[...x[1].matchAll(/\[(?:th|td)\]([\s\S]*?)\[\/(?:th|td)\]/gi)].map(y=>y[1]));if(!rows.length)return c;const h=rows[0];return '| '+h.join(' | ')+' |\n| '+h.map(()=> '---').join(' | ')+' |'+(rows.length>1?'\n'+rows.slice(1).map(r=>'| '+r.join(' | ')+' |').join('\n'):'');});return s;
+}
+function toPlain(s,current){let x=current==='markdown'?renderMarkdown(s):renderBBCode(s);const d=document.createElement('div');d.innerHTML=x;return d.innerText;}
+function convertTo(target){let text=editor.value;if(target==='plain'){editor.value=toPlain(text,mode.value);mode.value='markdown';}else if(target!==mode.value){editor.value=target==='bbcode'?mdToBB(text):bbToMd(text);mode.value=target;}update();toast(target==='plain'?'Convertido para texto simples.':`Convertido para ${target==='markdown'?'Markdown':'BBCode'}.`);}
+function applyPreset(p){if(!p)return;const m=mode.value==='markdown';let t='';if(p==='release')t=m?'# Atualização v1.0.0\n\n## Novidades\n- Item\n\n## Correções\n- Item':'[h1]Atualização v1.0.0[/h1]\n\n[h2]Novidades[/h2]\n[list]\n[*]Item\n[/list]\n\n[h2]Correções[/h2]\n[list]\n[*]Item\n[/list]';if(p==='guide')t=m?'# Título da seção\n\n## Objetivo\nTexto...\n\n### Passos\n1. Primeiro passo\n2. Segundo passo':'[h1]Título da seção[/h1]\n\n[h2]Objetivo[/h2]\nTexto...\n\n[h3]Passos[/h3]\n[list=1]\n[*]Primeiro passo\n[*]Segundo passo\n[/list]';if(p==='warning')t=m?'> ⚠️ **Atenção:** escreva o aviso aqui.':'[quote][b]⚠️ Atenção:[/b] escreva o aviso aqui.[/quote]';insert((editor.value?'\n\n':'')+t);}
+async function copyEditor(){try{await navigator.clipboard.writeText(editor.value);toast('Copiado!');}catch(e){const t=document.createElement('textarea');t.value=editor.value;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();toast('Copiado!');}}
+function saveManual(){save();toast('Salvo localmente.')}function clearEditor(){if(confirm('Limpar todo o conteúdo do editor?')){editor.value='';update();}}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),1800)}
+editor.addEventListener('input',update);mode.addEventListener('change',update);load();update();
+</script>
+</body>
+</html>
