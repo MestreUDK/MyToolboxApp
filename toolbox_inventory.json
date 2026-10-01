@@ -1,26 +1,13 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.0",
   "package": "com.animetoolbox.app",
   "tools": [
-    {
-      "asset": "agenda.html",
-      "source": "agenda_semanal_animes.html"
-    },
-    {
-      "asset": "calculadora.html",
-      "source": "calculadora_anime.html"
-    },
-    {
-      "asset": "context_dumper.html",
-      "source": "extrair_zip_v4.2.html"
-    },
-    {
-      "asset": "lista.html",
-      "source": "lista v2.0.html"
-    },
-    {
-      "asset": "organizador.html",
-      "source": "organizador_links_animes.html"
-    }
+    {"asset": "agenda.html", "source": "agenda_semanal_animes.html"},
+    {"asset": "calculadora.html", "source": "calculadora_anime.html"},
+    {"asset": "context_dumper.html", "source": "extrair_zip_v4.2.html"},
+    {"asset": "lista.html", "source": "lista v2.0.html"},
+    {"asset": "organizador.html", "source": "organizador_links_animes.html"},
+    {"asset": "changelog.html", "source": "gerador_changelog.html"},
+    {"asset": "markdown_bbcode.html", "source": "markdown_bbcode.html"}
   ]
 }
