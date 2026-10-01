@@ -335,7 +335,7 @@
             </div>
 
             <div class="field">
-              <label for="totalEpisodes">Total de episódios (opcional)</label>
+              <label for="totalEpisodes">Episódio final / total de episódios (opcional)</label>
               <input id="totalEpisodes" type="number" min="1" placeholder="Ex.: 12">
             </div>
 
@@ -504,14 +504,23 @@
         .sort((a, b) => a.anime.name.localeCompare(b.anime.name, "pt-BR"));
     }
 
+    function isFinalEpisode(anime, episode) {
+      return Boolean(anime.totalEpisodes) && Number(episode) === Number(anime.totalEpisodes);
+    }
+
+    function formatEpisodeLabel(anime, episode) {
+      return `${episode}${isFinalEpisode(anime, episode) ? " (Final)" : ""}`;
+    }
+
     function buildDailyText(dateString) {
       const entries = getEntriesForDate(dateString);
       if (!entries.length) return "Nenhum anime agendado para esta data.";
 
       return entries.flatMap(({ anime, episode }) => {
-        const lines = [`${anime.name} | ${episode}:`];
+        const episodeLabel = formatEpisodeLabel(anime, episode);
+        const lines = [`${anime.name} | ${episodeLabel}:`];
         if (anime.dubbed) {
-          lines.push(`${anime.name} [DUB] | ${episode}:`);
+          lines.push(`${anime.name} [DUB] | ${episodeLabel}:`);
         }
         return lines;
       }).join("\n");
@@ -556,6 +565,7 @@
       $("animeList").innerHTML = filtered.map(a => {
         const currentEpisode = getEpisodeForDate(a, nextWeekdayDate(Number(a.weekday)));
         const total = a.totalEpisodes ? ` de ${a.totalEpisodes}` : "";
+        const currentEpisodeLabel = currentEpisode !== null ? formatEpisodeLabel(a, currentEpisode) : "";
         return `
           <article class="anime-item ${a.paused ? "paused" : ""}">
             <div>
@@ -563,7 +573,7 @@
               <div class="anime-meta">
                 ${days[a.weekday]} • ${escapeHTML(a.season || "Temporada não informada")}<br>
                 Base: episódio ${a.baseEpisode} em ${formatDate(a.baseDate)} • +${a.increment}/semana
-                ${currentEpisode !== null ? `<br>Próximo cálculo: episódio ${currentEpisode}${total}` : ""}
+                ${currentEpisode !== null ? `<br>Próximo cálculo: episódio ${currentEpisodeLabel}${total}` : ""}
                 ${a.dubbed ? "<br>🎙️ Versão dublada simultânea [DUB]" : ""}
                 ${a.paused ? "<br>⏸ Agendamento pausado" : ""}
               </div>
@@ -783,9 +793,10 @@
 
       const body = entries
         .flatMap(({ anime, episode }) => {
-          const lines = [`${anime.name} | ${episode}`];
+          const episodeLabel = formatEpisodeLabel(anime, episode);
+          const lines = [`${anime.name} | ${episodeLabel}`];
           if (anime.dubbed) {
-            lines.push(`${anime.name} [DUB] | ${episode}`);
+            lines.push(`${anime.name} [DUB] | ${episodeLabel}`);
           }
           return lines;
         })
