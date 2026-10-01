@@ -1,17 +1,16 @@
 # Anime Toolbox Android
 
-Aplicativo Android que reúne seis ferramentas HTML em uma única Toolbox:
+Aplicativo Android que reúne cinco ferramentas HTML em uma única Toolbox:
 
 1. Agenda Semanal de Animes
 2. Calculadora de Prazo de Animes
 3. Context Dumper Pro v4.2
 4. Gerador de Lista v2.0
 5. Organizador de Links de Animes
-6. Gerador de Posts AniKing
 
 ## Integrações Android
 
-- Tela inicial com acesso às seis ferramentas.
+- Tela inicial com acesso às cinco ferramentas.
 - WebView com conteúdo local empacotado no APK.
 - `localStorage` preservado entre usos.
 - Seletor de arquivos Android para o Context Dumper e importações JSON.
@@ -38,4 +37,4 @@ Abra a pasta do projeto no Android Studio 2026.x e execute **Build > Build APK(s
 
 ## Observação
 
-A versão atual usa AGP 9.3.0, Gradle 9.5.0, compileSdk 37, Java 17 e Build Tools 36.0.0.
+A versão atual usa AGP 9.3.0, Gradle 9.5.0, compileSdk 35, Java 17 e Build Tools 36.0.0.
