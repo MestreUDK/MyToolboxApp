@@ -1,6 +1,8 @@
-# Anime Toolbox Android
+# Anime Toolbox PWA v1.1.0
 
-Aplicativo Android que reúne sete ferramentas HTML em uma única Toolbox:
+A Anime Toolbox agora é um site estático/PWA para GitHub Pages. Ela reúne sete ferramentas e pode ser instalada pelo navegador, funcionar em modo standalone e abrir offline após o primeiro carregamento.
+
+## Ferramentas
 
 1. Agenda Semanal de Animes
 2. Calculadora de Prazo de Animes
@@ -10,35 +12,55 @@ Aplicativo Android que reúne sete ferramentas HTML em uma única Toolbox:
 6. Gerador de Changelog
 7. Markdown / BBCode Toolbox
 
-## Integrações Android
+## Publicar no GitHub Pages
 
-- Tela inicial com acesso às sete ferramentas.
-- WebView com conteúdo local empacotado no APK.
-- `localStorage` preservado entre usos.
-- Seletor de arquivos Android para o Context Dumper e importações JSON.
-- Downloads de TXT/JSON salvos em `Downloads/Anime Toolbox` no Android 10+.
-- Compartilhamento nativo do Android.
-- Cópia para a área de transferência.
-- Notificações nativas para a Agenda Semanal.
-- JSZip 3.10.1 incluído localmente para o Context Dumper funcionar sem CDN.
+1. Coloque **todo o conteúdo desta pasta na raiz do repositório**.
+2. No GitHub, abra **Settings > Pages**.
+3. Em **Build and deployment > Source**, escolha **Deploy from a branch**.
+4. Selecione a branch **main** e a pasta **/(root)**.
+5. Salve e aguarde a publicação.
 
-## Ferramentas novas
+O projeto usa apenas caminhos relativos, portanto funciona em URLs de projeto como:
 
-### Gerador de Changelog
+`https://usuario.github.io/nome-do-repositorio/`
 
-Controle SemVer, itens de atualização, modo manutenção, mensagem pronta para Telegram/Discord e geração de `version.json` e `manutencao.json`.
+## Instalar como PWA
 
-### Markdown / BBCode Toolbox
+No Android/Chrome, abra o site publicado e use **Instalar app** / **Adicionar à tela inicial**. A página inicial também mostra o botão **Instalar** quando o navegador disponibiliza o evento de instalação.
 
-Editor offline com atalhos de formatação, prévia e conversão entre Markdown, BBCode e texto simples. Inclui títulos, links, citações, código, spoilers, listas e tabelas.
+## Offline e atualizações
 
-## Build
+O `sw.js` mantém as sete ferramentas, o JSZip e os ícones em cache. Após o primeiro carregamento online, a Toolbox pode abrir sem internet. Quando uma versão nova do service worker é detectada, a interface avisa que existe atualização disponível.
 
-### GitHub Actions
+Ao publicar uma alteração importante, incremente o valor `CACHE_NAME` em `sw.js` para forçar uma nova geração do cache (por exemplo, `anime-toolbox-pwa-v1.1.1-1`).
 
-O projeto utiliza `.github/workflows/build-apk.yml`.
+## Dados locais
 
-1. Coloque o projeto em um repositório GitHub.
-2. Abra **Actions > Build APK > Run workflow**.
-3. Ao finalizar, baixe o artifact **AnimeToolbox-debug-apk**.
-4. Dentro dele estará `app-debug.apk`.
+Dados armazenados com `localStorage` continuam locais ao navegador/dispositivo. Limpar os dados do site ou desinstalar a PWA pode remover esses dados; use os recursos de exportação/backup quando forem importantes.
+
+## Estrutura
+
+```text
+AnimeToolbox/
+├── index.html
+├── agenda.html
+├── calculadora.html
+├── changelog.html
+├── context_dumper.html
+├── lista.html
+├── markdown_bbcode.html
+├── organizador.html
+├── manifest.webmanifest
+├── pwa.js
+├── sw.js
+├── toolbox_inventory.json
+├── .nojekyll
+├── icons/
+│   ├── icon-192.png
+│   ├── icon-512.png
+│   └── icon-maskable-512.png
+└── vendor/
+    └── jszip.min.js
+```
+
+A antiga camada Android (`app/`, Gradle, AndroidManifest, MainActivity e workflow de APK) não é necessária para esta versão PWA.

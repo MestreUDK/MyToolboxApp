@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Changelog</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#4f378b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Anime Toolbox">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+
+<style>
+  :root { 
+    --bg: #1e1e2e; 
+    --panel: #262638; 
+    --input: #32324a; 
+    --text: #cdd6f4; 
+    --accent: #89b4fa; 
+    --green: #a6e3a1; 
+    --red: #f38ba8; 
+    --yellow: #f9e2af;
+  }
+  
+  body { 
+    font-family: 'Segoe UI', Tahoma, sans-serif; 
+    background: var(--bg); 
+    color: var(--text); 
+    margin: 0; 
+    padding: 20px; 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 20px; 
+    min-height: 100vh; 
+    box-sizing: border-box; 
+  }
+  
+  /* Layout Mobile First */
+  .col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; }
+  
+  h2 { 
+    color: var(--accent); 
+    border-bottom: 2px solid var(--panel); 
+    padding-bottom: 10px; 
+    margin-top: 0; 
+    font-size: 1.2rem;
+  }
+  
+  /* Cards */
+  .card { 
+    background: var(--panel); 
+    padding: 15px; 
+    border-radius: 10px; 
+    border-left: 4px solid var(--accent); 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  }
+  .card h3 { margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; color: #6c7086; display: flex; align-items: center; gap: 8px; }
+
+  /* Version Control */
+  .version-display { font-size: 32px; font-weight: bold; text-align: center; margin: 15px 0; color: #fff; font-family: monospace; letter-spacing: 2px; }
+  .version-controls { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
+  
+  .btn-ver { 
+    padding: 8px 12px; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    color: #1e1e2e; 
+    font-weight: bold; 
+    transition: 0.2s; 
+    flex: 1;
+    min-width: 80px;
+  }
+  .btn-ver:active { transform: scale(0.95); }
+  
+  /* Inputs */
+  input, textarea, select { 
+    width: 100%; 
+    padding: 12px; 
+    background: var(--input); 
+    border: 1px solid #45475a; 
+    color: white; 
+    border-radius: 6px; 
+    box-sizing: border-box; 
+    margin-bottom: 8px; 
+    font-size: 14px;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--accent); }
+
+  /* Lista de Mudanças */
+  .change-item { display: flex; gap: 8px; margin-bottom: 8px; animation: fadeIn 0.3s; align-items: center; }
+  .btn-add { background: var(--green); color: #1e1e2e; width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+  .btn-del { background: var(--red); color: white; border: none; border-radius: 6px; cursor: pointer; padding: 0 12px; height: 42px; display: flex; align-items: center;}
+
+  /* Preview Telegram */
+  .preview-box { 
+    background: #181825; 
+    padding: 15px; 
+    border-radius: 10px; 
+    white-space: pre-wrap; 
+    font-size: 14px; 
+    border: 1px solid #313244; 
+    color: #fff; 
+    min-height: 150px;
+  }
+  
+  /* Code Blocks */
+  .code-block { 
+    background: #11111b; 
+    padding: 10px; 
+    border-radius: 6px; 
+    font-family: monospace; 
+    font-size: 12px; 
+    color: #a6adc8; 
+    position: relative; 
+    margin-top: 5px; 
+    border: 1px solid #313244; 
+    overflow-x: auto;
+  }
+  .copy-icon { position: absolute; top: 5px; right: 5px; cursor: pointer; font-size: 16px; opacity: 0.7; background: #313244; padding: 2px 6px; border-radius: 4px; }
+  .copy-icon:hover { opacity: 1; background: var(--accent); color: #1e1e2e; }
+
+  button.main-action { background: var(--accent); color: #1e1e2e; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; box-shadow: 0 4px 0 #5b7bb5; transition: 0.1s;}
+  button.main-action:active { transform: translateY(4px); box-shadow: 0 0 0; }
+  
+  .badge-app { background: var(--input); padding: 2px 8px; border-radius: 4px; font-size: 12px; color: var(--accent); margin-left: auto; }
+
+  /* Toast Notification (Aviso de copiado) */
+  #toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 2px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 17px;
+      border-radius: 10px;
+      background: var(--green);
+      color: #1e1e2e;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+
+  #toast.show {
+      visibility: visible;
+      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  }
+
+  @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+  @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: 0; } }
+</style>
+<style id="toolbox-mobile-patch">
+  html { -webkit-text-size-adjust: 100%; }
+  body { overscroll-behavior-y: contain; }
+  @media (max-width: 720px) {
+    body { padding: 10px; gap: 12px; overflow-x: hidden; }
+    .col { min-width: 0; flex: 1 1 100%; }
+    .card { padding: 12px; }
+    input, textarea, select, button { min-height: 44px; }
+    .change-item { align-items: stretch; flex-wrap: wrap; }
+    .change-item select { width: 110px !important; flex: 0 0 110px; }
+    .change-item input { flex: 1 1 calc(100% - 165px); min-width: 150px; }
+    .btn-del { height: 44px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="col">
+  <h2>⚙️ Dados do Projeto</h2>
+  
+  <div class="card" style="border-color: #cba6f7;">
+    <h3>📝 Identificação <span class="badge-app" id="savedBadge" style="opacity:0">Salvo!</span></h3>
+    <div style="display: flex; gap: 10px;">
+        <input type="text" id="projectName" placeholder="Nome (Ex: AniKing)" oninput="saveAndRender()" style="flex:2">
+        <select id="projectType" onchange="saveAndRender()" style="flex:1">
+            <option value="Bot">Bot</option>
+            <option value="App">App</option>
+            <option value="Site">Site</option>
+            <option value="API">API</option>
+        </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🏷️ Controle de Versão (SemVer)</h3>
+    <div class="version-display" id="verDisplay">1.0.0</div>
+    <div class="version-controls">
+      <button class="btn-ver" style="background:#f9e2af" onclick="bumpVersion(0)">MAJOR<br><small>+1.0.0</small></button>
+      <button class="btn-ver" style="background:#89b4fa" onclick="bumpVersion(1)">MINOR<br><small>+0.1.0</small></button>
+      <button class="btn-ver" style="background:#a6e3a1" onclick="bumpVersion(2)">PATCH<br><small>+0.0.1</small></button>
+    </div>
+    <div style="margin-top:10px; display:flex; gap:10px">
+        <input type="text" id="manualVer" placeholder="Ex: 2.0.0-beta" onchange="setManualVer(this.value)">
+        <button class="btn-ver" style="background:#45475a; color:#fff; min-width: 50px;" onclick="resetVer()">Reset</button>
+    </div>
+  </div>
+
+  <div class="card" style="border-color: #f38ba8;">
+    <h3>🚧 Status & Manutenção</h3>
+    <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-bottom: 10px;">
+        <input type="checkbox" id="maintenanceMode" style="width:20px; height:20px; margin:0;" onchange="saveAndRender()"> 
+        <span style="font-weight:bold; color: var(--red)">Ativar Modo Manutenção</span>
+    </label>
+    <input type="text" id="maintenanceReason" placeholder="Motivo (Ex: Migração de Banco de Dados)" oninput="saveAndRender()">
+  </div>
+
+  <div class="card">
+    <h3>📜 Itens do Changelog</h3>
+    <div id="changesList"></div>
+    <button class="btn-add" onclick="addChange()">+ Adicionar Item</button>
+  </div>
+</div>
+
+<div class="col">
+  <h2>🚀 Saída e Arquivos</h2>
+
+  <div class="card" style="border-color: #fab387;">
+    <h3>Mensagem (Telegram / Discord)</h3>
+    <div id="telegramPreview" class="preview-box"></div>
+    <button class="main-action" onclick="copyText('telegramPreview')">📋 Copiar Mensagem</button>
+  </div>
+
+  <div class="card" style="border-color: #89dceb;">
+    <h3>Arquivos JSON (Backend)</h3>
+    
+    <div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; font-weight:bold; color: var(--accent)">📄 version.json</span>
+        </div>
+        <div class="code-block">
+            <span class="copy-icon" onclick="copyText('jsonVersion')">COPIAR</span>
+            <div id="jsonVersion"></div>
+        </div>
+    </div>
+
+    <div style="margin-top:15px">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; font-weight:bold; color: var(--red)">📄 manutencao.json</span>
+        </div>
+        <div class="code-block">
+            <span class="copy-icon" onclick="copyText('jsonMaint')">COPIAR</span>
+            <div id="jsonMaint"></div>
+        </div>
+    </div>
+  </div>
+  
+  <div style="text-align: center; font-size: 12px; color: #6c7086; margin-top: 20px;">
+      Desenvolvido para agilizar updates ⚡
+  </div>
+</div>
+
+<div id="toast">Copiado para a área de transferência!</div>
+
+<script>
+// --- Configuração ---
+const STORAGE_KEY = 'changelog_generator_data';
+
+// Ícones e Textos
+const types = {
+    'feat':     { icon: '✨', label: 'Novidade' },
+    'fix':      { icon: '🐛', label: 'Correção' },
+    'refactor': { icon: '♻️', label: 'Melhoria' },
+    'perf':     { icon: '🚀', label: 'Performance' },
+    'sec':      { icon: '🔒', label: 'Segurança' },
+    'break':    { icon: '⚠️', label: 'BREAKING CHANGE' },
+    'info':     { icon: '📢', label: 'Aviso' },
+    'del':      { icon: '🗑️', label: 'Removido' }
+};
+
+// Estado Padrão
+let state = {
+    projectName: 'Meu Projeto',
+    projectType: 'Bot',
+    version: [1, 0, 0], // Major, Minor, Patch
+    maintenance: false,
+    maintReason: 'Melhorias internas',
+    changes: [
+        { type: 'feat', text: 'Sistema de changelog implementado' }
+    ]
+};
+
+// --- Inicialização ---
+window.onload = () => {
+    loadFromStorage();
+    renderUI();
+    renderOutput();
+};
+
+// --- Lógica de Estado e Storage ---
+function loadFromStorage() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        const parsed = JSON.parse(saved);
+        state = { ...state, ...parsed };
+    }
+}
+
+function saveToStorage() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const badge = document.getElementById('savedBadge');
+    badge.style.opacity = 1;
+    setTimeout(() => badge.style.opacity = 0, 1500);
+}
+
+function saveAndRender() {
+    state.projectName = document.getElementById('projectName').value;
+    state.projectType = document.getElementById('projectType').value;
+    state.maintenance = document.getElementById('maintenanceMode').checked;
+    state.maintReason = document.getElementById('maintenanceReason').value;
+    saveToStorage();
+    renderOutput();
+}
+
+// --- Lógica de Versão ---
+function bumpVersion(idx) {
+    state.version[idx]++;
+    for(let i = idx + 1; i < 3; i++) state.version[i] = 0;
+    saveToStorage();
+    renderUI();
+    renderOutput();
+}
+
+function setManualVer(str) {
+    const parts = str.split('.').map(Number);
+    if(parts.length === 3 && !parts.some(isNaN)) {
+        state.version = parts;
+        saveToStorage();
+        renderUI();
+        renderOutput();
+    } else {
+        alert("Formato inválido! Use: x.y.z (Ex: 1.0.5)");
+    }
+}
+
+function resetVer() {
+    if(confirm("Reiniciar versão para 1.0.0?")) {
+        state.version = [1, 0, 0];
+        saveToStorage();
+        renderUI();
+        renderOutput();
+    }
+}
+
+function getVerString() {
+    return state.version.join('.');
+}
+
+// --- Lógica de Lista de Mudanças ---
+function renderUI() {
+    document.getElementById('projectName').value = state.projectName;
+    document.getElementById('projectType').value = state.projectType;
+    document.getElementById('verDisplay').innerText = getVerString();
+    document.getElementById('maintenanceMode').checked = state.maintenance;
+    document.getElementById('maintenanceReason').value = state.maintReason;
+
+    const container = document.getElementById('changesList');
+    container.innerHTML = '';
+    
+    state.changes.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'change-item';
+        let options = '';
+        for (const [key, val] of Object.entries(types)) {
+            options += `<option value="${key}" ${item.type === key ? 'selected' : ''}>${val.icon} ${key.toUpperCase()}</option>`;
+        }
+        div.innerHTML = `
+            <select onchange="updateChange(${index}, 'type', this.value)" style="width:130px; margin:0">
+                ${options}
+            </select>
+            <input type="text" value="${item.text}" oninput="updateChange(${index}, 'text', this.value)" placeholder="Descrição da mudança..." style="margin:0">
+            <button class="btn-del" onclick="removeChange(${index})">❌</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function addChange() {
+    state.changes.push({ type: 'feat', text: '' });
+    renderUI();
+    renderOutput();
+}
+
+function removeChange(index) {
+    state.changes.splice(index, 1);
+    saveToStorage();
+    renderUI();
+    renderOutput();
+}
+
+function updateChange(index, field, value) {
+    state.changes[index][field] = value;
+    saveToStorage();
+    renderOutput();
+}
+
+// --- Geração de Saída ---
+function renderOutput() {
+    const verStr = getVerString();
+    const dateNow = new Date().toLocaleDateString('pt-BR');
+
+    let msg = `<b>🔔 Atualização: ${state.projectName}</b>\n`;
+    msg += `<i>Versão ${verStr} • ${dateNow}</i>\n\n`;
+    
+    if (state.changes.length > 0 && state.changes.some(c => c.text.trim() !== "")) {
+        const grouped = {};
+        state.changes.forEach(c => {
+            if(!c.text) return;
+            if(!grouped[c.type]) grouped[c.type] = [];
+            grouped[c.type].push(c.text);
+        });
+
+        const priority = ['break', 'sec', 'feat', 'fix', 'refactor', 'perf', 'info', 'del'];
+
+        priority.forEach(typeKey => {
+            if (grouped[typeKey]) {
+                const typeInfo = types[typeKey];
+                msg += `<b>${typeInfo.icon} ${typeInfo.label}</b>\n`;
+                grouped[typeKey].forEach(item => msg += `• ${item}\n`);
+                msg += `\n`;
+            }
+        });
+    } else {
+        msg += `<i>Manutenção de rotina e melhorias internas.</i>\n\n`;
+    }
+
+    msg += `👨‍💻 <i>Dev: Atualize seu ${state.projectType.toLowerCase()} agora!</i>`;
+    document.getElementById('telegramPreview').innerHTML = msg;
+
+    const versionJson = {
+        "project": state.projectName,
+        "type": state.projectType,
+        "version": verStr,
+        "last_update": new Date().toISOString().split('T')[0],
+        "build_id": Math.floor(Date.now() / 1000)
+    };
+    document.getElementById('jsonVersion').innerText = JSON.stringify(versionJson, null, 4);
+
+    const maintJson = {
+        "status": state.maintenance ? "maintenance" : "online",
+        "message": state.maintReason,
+        "retry_after": state.maintenance ? 3600 : 0
+    };
+    document.getElementById('jsonMaint').innerText = JSON.stringify(maintJson, null, 4);
+}
+
+// --- LÓGICA DE CÓPIA ROBUSTA (COMPATIBILITY MODE) ---
+function copyText(elementId) {
+    const element = document.getElementById(elementId);
+    // Pega o texto. Se for input usa .value, se for div usa .innerText
+    const textToCopy = element.value || element.innerText;
+
+    // Tenta a API Nova (Pode falhar em Mobile/Local)
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textToCopy)
+            .then(showToast)
+            .catch(() => fallbackCopy(textToCopy)); // Se falhar, usa fallback
+    } else {
+        fallbackCopy(textToCopy); // Se não tiver API, usa fallback direto
+    }
+}
+
+function fallbackCopy(text) {
+    // Cria textarea temporário invisível
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    
+    // Garante que fique fora da tela mas renderizado
+    textArea.style.position = "fixed";
+    textArea.style.left = "-9999px";
+    textArea.style.top = "0";
+    document.body.appendChild(textArea);
+    
+    // Seleciona e Copia
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        if(successful) showToast();
+        else alert("Não foi possível copiar automaticamente.");
+    } catch (err) {
+        alert("Erro ao copiar: " + err);
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+function showToast() {
+    const x = document.getElementById("toast");
+    x.className = "show";
+    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+}
+</script>
+
+<script src="pwa.js"></script>
+</body>
+</html>

@@ -1,13 +1,34 @@
 {
   "version": "1.1.0",
-  "package": "com.animetoolbox.app",
+  "platform": "PWA / GitHub Pages",
   "tools": [
-    {"asset": "agenda.html", "source": "agenda_semanal_animes.html"},
-    {"asset": "calculadora.html", "source": "calculadora_anime.html"},
-    {"asset": "context_dumper.html", "source": "extrair_zip_v4.2.html"},
-    {"asset": "lista.html", "source": "lista v2.0.html"},
-    {"asset": "organizador.html", "source": "organizador_links_animes.html"},
-    {"asset": "changelog.html", "source": "gerador_changelog.html"},
-    {"asset": "markdown_bbcode.html", "source": "markdown_bbcode.html"}
+    {
+      "asset": "agenda.html",
+      "name": "Agenda Semanal de Animes"
+    },
+    {
+      "asset": "calculadora.html",
+      "name": "Calculadora de Prazo de Animes"
+    },
+    {
+      "asset": "context_dumper.html",
+      "name": "Context Dumper Pro v4.2"
+    },
+    {
+      "asset": "lista.html",
+      "name": "Gerador de Lista v2.0"
+    },
+    {
+      "asset": "organizador.html",
+      "name": "Organizador de Links de Animes"
+    },
+    {
+      "asset": "changelog.html",
+      "name": "Gerador de Changelog"
+    },
+    {
+      "asset": "markdown_bbcode.html",
+      "name": "Markdown / BBCode Toolbox"
+    }
   ]
 }
