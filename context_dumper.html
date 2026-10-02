@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <title>Context Dumper Pro (v4.2)</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#4f378b">
+<meta name="theme-color" content="#11131a">
+<meta name="color-scheme" content="dark">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,6 +16,20 @@
 <script src="vendor/jszip.min.js"></script>
 <style>
   :root {
+    color-scheme: dark;
+    --primary: #60a5fa;
+    --primary-hover: #3b82f6;
+    --bg: #0f1118;
+    --surface: #1b1e29;
+    --text: #f1f5f9;
+    --border: #343849;
+    --code-bg: #090a0f;
+    --success: #34d399;
+    --warning: #f6c453;
+  }
+
+  [data-theme="light"] {
+    color-scheme: light;
     --primary: #2563eb;
     --primary-hover: #1d4ed8;
     --bg: #f8fafc;
@@ -24,14 +39,6 @@
     --code-bg: #1e1e1e;
     --success: #10b981;
     --warning: #f59e0b;
-  }
-
-  [data-theme="dark"] {
-    --bg: #0f172a;
-    --surface: #1e293b;
-    --text: #f1f5f9;
-    --border: #334155;
-    --code-bg: #000000;
   }
 
   body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text); padding: 20px; transition: 0.3s; }
@@ -52,8 +59,8 @@
   .tree-ul li { margin: 2px 0; }
   
   .tree-label { cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; user-select: none; padding: 2px 5px; border-radius: 4px; }
-  .tree-label:hover { background: rgba(0,0,0,0.05); }
-  [data-theme="dark"] .tree-label:hover { background: rgba(255,255,255,0.1); }
+  .tree-label:hover { background: rgba(255,255,255,0.08); }
+  [data-theme="light"] .tree-label:hover { background: rgba(0,0,0,0.05); }
   
   .folder-icon { color: #f59e0b; font-weight: bold; min-width: 16px; text-align: center; }
   .file-icon { color: #64748b; min-width: 16px; text-align: center; }
@@ -67,7 +74,8 @@
   /* Controls & Stats */
   .controls { margin-top: 25px; display: flex; gap: 10px; flex-wrap: wrap; }
   button { padding: 10px 18px; font-size: 14px; cursor: pointer; border: none; border-radius: 8px; font-weight: 600; color: #fff; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-  button:disabled { opacity: 0.5; cursor: not-allowed; background: #ccc !important; }
+  button:disabled { opacity: 0.55; cursor: not-allowed; background: #303543 !important; color: #8f98aa !important; }
+  [data-theme="light"] button:disabled { background: #ccc !important; color: #555 !important; }
   
   .btn-primary { background: var(--primary); }
   .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }

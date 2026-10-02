@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gerador de Lista</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#4f378b">
+<meta name="theme-color" content="#11131a">
+<meta name="color-scheme" content="dark">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,35 +15,69 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 
 <style>
+  :root {
+    color-scheme: dark;
+    --bg: #11131a;
+    --card: #1c1f2a;
+    --input: #13151d;
+    --text: #f2f3f8;
+    --muted: #a1a7b6;
+    --border: #343849;
+    --primary: #8b7cf6;
+    --primary-hover: #6f60df;
+    --success: #48b97d;
+    --success-hover: #369866;
+  }
+
+  * { box-sizing: border-box; }
+
   body {
+    margin: 0;
+    min-height: 100vh;
     font-family: Arial, sans-serif;
-    background: #f5f5f5;
+    color: var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(103,80,164,.22), transparent 28rem),
+      var(--bg);
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 30px;
   }
-  h2 { color: #333; }
+
+  h2 { color: #d7d2ff; margin-top: 0; }
+
   .container {
-    background: #fff;
+    background: var(--card);
     padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 30px rgba(0,0,0,.28);
     max-width: 400px;
     width: 100%;
   }
+
   input[type="text"],
   input[type="number"] {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
     margin: 6px 0;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    color: var(--text);
+    background: var(--input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
   }
-  label {
-    display: block;
-    margin-top: 8px;
+
+  input::placeholder { color: #737a8d; }
+
+  input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(139,124,246,.15);
   }
+
+  label { display: block; margin-top: 8px; color: var(--muted); }
+
   .checkbox {
     display: flex;
     align-items: center;
@@ -50,28 +85,34 @@
     gap: 6px;
     font-size: 14px;
   }
+
+  .checkbox input { accent-color: var(--primary); }
+  .checkbox label { margin: 0; color: var(--text); }
+
   button {
     width: 100%;
     padding: 10px;
-    background: #0078ff;
+    background: var(--primary);
     border: none;
     color: white;
     font-size: 16px;
-    border-radius: 6px;
+    font-weight: 700;
+    border-radius: 8px;
     cursor: pointer;
     margin-top: 8px;
   }
-  button:hover { background: #005fcc; }
-  #copiarBtn {
-    background: #00b45a;
-    display: none;
-  }
-  #copiarBtn:hover { background: #00994d; }
+
+  button:hover { background: var(--primary-hover); }
+
+  #copiarBtn { background: var(--success); display: none; }
+  #copiarBtn:hover { background: var(--success-hover); }
+
   pre {
-    background: #222;
-    color: #0f0;
+    background: #0d0f15;
+    color: #90e7ad;
+    border: 1px solid #2d3140;
     padding: 15px;
-    border-radius: 8px;
+    border-radius: 10px;
     margin-top: 20px;
     white-space: pre-wrap;
     min-height: 50px;

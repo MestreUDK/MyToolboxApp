@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Organizador de Links de Animes</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#4f378b">
+<meta name="theme-color" content="#11131a">
+<meta name="color-scheme" content="dark">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,22 +16,23 @@
 
   <style>
     :root {
-      --bg: #f5f4fb;
-      --card: #ffffff;
-      --text: #242338;
-      --muted: #6f6d83;
-      --primary: #6750a4;
-      --primary-dark: #4f378b;
-      --primary-soft: #eee8fa;
-      --success: #19764a;
-      --success-soft: #e4f5eb;
-      --warning: #986400;
-      --warning-soft: #fff2cc;
-      --danger: #b3261e;
-      --danger-soft: #fde8e6;
-      --border: #dfdce9;
-      --code: #1d1c29;
-      --shadow: 0 12px 34px rgba(48, 42, 79, .10);
+      color-scheme: dark;
+      --bg: #11131a;
+      --card: #1c1f2a;
+      --text: #f2f3f8;
+      --muted: #a1a7b6;
+      --primary: #8b7cf6;
+      --primary-dark: #6f60df;
+      --primary-soft: #2b2940;
+      --success: #78d9a2;
+      --success-soft: #173126;
+      --warning: #f6c453;
+      --warning-soft: #352f1c;
+      --danger: #ff9ca3;
+      --danger-soft: #352027;
+      --border: #343849;
+      --code: #0d0f15;
+      --shadow: 0 12px 34px rgba(0, 0, 0, .28);
     }
 
     * { box-sizing: border-box; }
@@ -42,7 +44,7 @@
       color: var(--text);
       background:
         radial-gradient(circle at top left, rgba(103, 80, 164, .12), transparent 32rem),
-        linear-gradient(135deg, #f9f7ff, var(--bg));
+        linear-gradient(135deg, #171923, var(--bg));
       font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
@@ -98,7 +100,7 @@
     input, select, textarea {
       width: 100%;
       color: var(--text);
-      background: white;
+      background: #13151d;
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 11px 12px;
@@ -106,6 +108,8 @@
       transition: border-color .16s ease, box-shadow .16s ease;
     }
 
+
+    input::placeholder, textarea::placeholder { color: #747b8d; }
     input:focus, select:focus, textarea:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(103, 80, 164, .13);
@@ -162,15 +166,15 @@
     .success { color: var(--success); background: var(--success-soft); }
     .warning { color: var(--warning); background: var(--warning-soft); }
     .danger { color: var(--danger); background: var(--danger-soft); }
-    .neutral { color: #525064; background: #f0eff4; }
+    .neutral { color: #c3c7d1; background: #292c36; border: 1px solid #3b3f4b; }
 
     .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-bottom: 14px; }
 
     .stat {
       padding: 11px 8px;
       text-align: center;
-      background: #f8f6fc;
-      border: 1px solid #ebe8f2;
+      background: #171923;
+      border: 1px solid #2e3240;
       border-radius: 13px;
     }
 
@@ -222,7 +226,7 @@
       pointer-events: none;
       max-width: min(92vw, 560px);
       color: white;
-      background: #353143;
+      background: #242735;
       padding: 11px 16px;
       border-radius: 12px;
       box-shadow: var(--shadow);
@@ -245,7 +249,7 @@
       border: 1px solid var(--border);
       border-radius: 15px;
       padding: 13px;
-      background: #fff;
+      background: #181b25;
     }
 
     .history-top {
@@ -266,7 +270,7 @@
       padding: 10px 12px;
       margin-top: 8px;
       color: var(--muted);
-      background: #f8f6fc;
+      background: #171923;
       border-radius: 12px;
       font-family: "Cascadia Code", Consolas, monospace;
       font-size: .8rem;

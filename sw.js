@@ -1,4 +1,4 @@
-const CACHE_NAME = 'anime-toolbox-pwa-v1.1.0-1';
+const CACHE_NAME = 'anime-toolbox-pwa-v1.1.0-dark-2';
 const APP_SHELL = [
   './',
   './index.html',
